@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Voluntário - ONG Transformar</title>
+  <link rel="stylesheet" href="../css/style-modern.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand-link" href="index.html" aria-label="ONG Transformar">
+      <img src="../imagens/logo-ong-transformar.jpg" alt="ONG Transformar" class="logo">
+    </a>
+
+    <nav class="main-nav" aria-label="Navegação principal">
+      <a href="index.html" class="nav-link">Página Principal</a>
+      <a href="#cadastro" class="nav-link active">Cadastro</a>
+    </nav>
+
+    <a class="header-button" href="index.html">Voltar ao início</a>
+  </header>
+
+  <main class="page-cadastro">
+    <section class="registration-card" aria-labelledby="page-title">
+      <section class="registration-hero">
+        <figure class="registration-brand">
+          <img src="../imagens/logo-ong-transformar.jpg" alt="ONG Transformar" class="logo">
+        </figure>
+
+        <span class="registration-divider" aria-hidden="true"></span>
+
+        <section class="registration-content">
+          <span class="section-kicker">Seja parte do projeto</span>
+          <h1 id="page-title">Cadastro de <span>Voluntário</span></h1>
+          <p>Preencha seus dados e faça parte dessa transformação!</p>
+        </section>
+      </section>
+
+      <article class="form-wrapper">
+        <section class="form-panel">
+          <form class="volunteer-form">
+            <fieldset class="form-fieldset">
+              <legend>Dados pessoais</legend>
+
+              <div class="field-group">
+                <label for="nome">Nome completo <span>*</span></label>
+                <div class="input-with-icon">
+                  <div class="icon-box" aria-hidden="true">👤</div>
+                  <input id="nome" name="nome" type="text" placeholder="Digite seu nome completo" required pattern="^[A-Za-zÀ-ÿ]+(?:\s[A-Za-zÀ-ÿ]+)+$" title="Informe o nome completo com pelo menos duas partes." minlength="3">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="field-group">
+                  <label for="email">E-mail <span>*</span></label>
+                  <div class="input-with-icon">
+                    <div class="icon-box" aria-hidden="true">✉</div>
+                    <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" required pattern="^[^\s@]+@[^\s@]+\.[^\s@]{2,}$" title="Informe um e-mail válido no formato nome@dominio.com">
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <label for="telefone">Telefone <span>*</span></label>
+                  <div class="input-with-icon">
+                    <div class="icon-box" aria-hidden="true">☎</div>
+                    <input id="telefone" name="telefone" type="tel" placeholder="(00) 00000-0000" required pattern="^\(\d{2}\)\s?\d{4,5}-\d{4}$" title="Informe o telefone no formato (00) 00000-0000">
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset class="form-fieldset">
+              <legend>Disponibilidade e interesse</legend>
+
+              <div class="field-group">
+                <label for="disponibilidade">Disponibilidade <span>*</span></label>
+                <div class="input-with-icon select-wrapper">
+                  <div class="icon-box" aria-hidden="true">☼</div>
+                  <select id="disponibilidade" name="disponibilidade" required>
+                    <option value="" selected disabled>Selecione sua disponibilidade</option>
+                    <option>Durante a semana</option>
+                    <option>Finais de semana</option>
+                    <option>Manhã</option>
+                    <option>Tarde</option>
+                    <option>Noite</option>
+                  </select>
+                  <span class="chevron"></span>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="areas">Áreas de interesse <span>*</span></label>
+                <div class="input-with-icon select-wrapper">
+                  <div class="icon-box" aria-hidden="true">✦</div>
+                  <select id="areas" name="areas" required>
+                    <option value="" selected disabled>Selecione uma ou mais áreas</option>
+                    <option>Educação</option>
+                    <option>Inclusão social</option>
+                    <option>Eventos</option>
+                    <option>Comunicação</option>
+                    <option>Administrativo</option>
+                  </select>
+                  <span class="chevron"></span>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="mensagem">Mensagem (opcional)</label>
+                <div class="input-with-icon textarea-wrapper">
+                  <div class="icon-box" aria-hidden="true">✎</div>
+                  <textarea id="mensagem" name="mensagem" placeholder="Conte um pouco sobre você e sua motivação para ser um voluntário..."></textarea>
+                </div>
+              </div>
+            </fieldset>
+
+            <button type="submit" class="submit-button">
+              <span class="send-icon">➤</span>
+              <span>Enviar Cadastro</span>
+            </button>
+
+            <p class="security-note">
+              <span class="lock-icon">🔒</span>
+              <span>Seus dados estão seguros. Utilizamos suas informações apenas para fins institucionais.</span>
+            </p>
+          </form>
+
+          <section class="feedback-showcase" aria-labelledby="feedback-title">
+            <div class="feedback-heading">
+              <span class="section-kicker">Retorno imediato</span>
+              <h2 id="feedback-title">Microinterações de atendimento</h2>
+              <p>Mensagens curtas orientam o próximo passo sem interromper a tarefa.</p>
+            </div>
+
+            <div class="feedback-alerts">
+              <div class="feedback-alert feedback-alert-success" role="status">
+                <span class="feedback-alert-icon" aria-hidden="true">✓</span>
+                <div>
+                  <strong>Cadastro pronto para envio</strong>
+                  <span>Todos os campos obrigatórios foram preenchidos.</span>
+                </div>
+              </div>
+              <div class="feedback-alert feedback-alert-warning" role="alert">
+                <span class="feedback-alert-icon" aria-hidden="true">!</span>
+                <div>
+                  <strong>Confira seus dados</strong>
+                  <span>Revise os campos destacados antes de continuar.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="feedback-demo-row">
+              <span class="feedback-label">Etiquetas ativas</span>
+              <div class="feedback-badges" aria-label="Categorias de projetos">
+                <span class="feedback-badge feedback-badge-green">Educação</span>
+                <span class="feedback-badge feedback-badge-blue">Inclusão</span>
+                <span class="feedback-badge feedback-badge-orange">Prioridade</span>
+              </div>
+              <button class="feedback-toast-trigger" type="button">Mostrar toast</button>
+            </div>
+          </section>
+        </section>
+
+        <aside class="volunteer-aside">
+          <div class="volunteer-aside-card">
+            <span class="volunteer-aside-tag">Programa Voluntariado</span>
+            <h3 class="volunteer-aside-title">Transformar com ação</h3>
+
+            <div class="volunteer-aside-image">
+              <img src="assets/img/institucional-ong.jpg" alt="Trabalho voluntário em educação e inclusão">
+              <span class="volunteer-aside-image-caption">Educação • Inclusão • Comunidade</span>
+              <span class="volunteer-aside-year">Ação Social 2026</span>
+            </div>
+
+            <div class="volunteer-aside-line"></div>
+
+            <div class="volunteer-aside-stats">
+              <div class="volunteer-stat">
+                <span class="volunteer-stat-number">12+</span>
+                <span class="volunteer-stat-label">ações por mês</span>
+              </div>
+              <div class="volunteer-stat">
+                <span class="volunteer-stat-number">350</span>
+                <span class="volunteer-stat-label">voluntários ativos</span>
+              </div>
+              <div class="volunteer-stat">
+                <span class="volunteer-stat-number">04</span>
+                <span class="volunteer-stat-label">frentes de apoio</span>
+              </div>
+            </div>
+
+            <div class="timeline-panel">
+              <div class="timeline-title">Campanhas sociais</div>
+              <div class="timeline-list">
+                <div class="timeline-item">
+                  <span class="timeline-point"></span>
+                  <span class="timeline-label">Jan</span>
+                  <span class="timeline-text">Escolas em ação</span>
+                </div>
+                <div class="timeline-item">
+                  <span class="timeline-point"></span>
+                  <span class="timeline-label">Mar</span>
+                  <span class="timeline-text">Alimenta a esperança</span>
+                </div>
+                <div class="timeline-item">
+                  <span class="timeline-point"></span>
+                  <span class="timeline-label">Ago</span>
+                  <span class="timeline-text">Semana da inclusão</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="impact-map">
+              <div class="impact-map-head">
+                <span class="impact-map-title">Território de atuação</span>
+                <span class="impact-map-icon">✧</span>
+              </div>
+              <div class="impact-map-grid">
+                <span class="impact-city city-sp">SP</span>
+                <span class="impact-city city-rj">RJ</span>
+                <span class="impact-city city-ba">BA</span>
+                <span class="impact-city city-pe">PE</span>
+              </div>
+            </div>
+
+            <div class="campaign-status">
+              <div class="campaign-status-head">
+                <span class="campaign-status-title">Campanhas ativas</span>
+                <span class="campaign-status-number">08/10</span>
+              </div>
+              <div class="campaign-status-track">
+                <span class="campaign-status-bar"></span>
+              </div>
+              <div class="campaign-status-meta">
+                <span class="campaign-status-label">Nutrição</span>
+                <span class="campaign-status-label">Educação</span>
+                <span class="campaign-status-label">Inclusão</span>
+              </div>
+            </div>
+
+            <div class="volunteer-aside-list">
+              <div class="volunteer-aside-row"><span class="row-icon">✦</span><span>Educação e inclusão</span></div>
+              <div class="volunteer-aside-row"><span class="row-icon">✦</span><span>Eventos comunitários</span></div>
+              <div class="volunteer-aside-row"><span class="row-icon">✦</span><span>Atendimento social</span></div>
+            </div>
+
+            <a href="index.html" class="volunteer-aside-link">Conheça nossa missão</a>
+          </div>
+        </aside>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>ONG Transformar — Educação, inclusão e solidariedade.</p>
+  </footer>
+
+  <div class="feedback-toast" role="status" aria-live="polite" aria-hidden="true">
+    <span class="feedback-toast-icon" aria-hidden="true">✓</span>
+    <span><strong>Preferência salva</strong><small>Seu interesse foi registrado.</small></span>
+    <button class="feedback-toast-close" type="button" aria-label="Fechar notificação">×</button>
+  </div>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

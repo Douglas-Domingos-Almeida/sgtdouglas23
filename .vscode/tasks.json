@@ -1,0 +1,15 @@
+{
+  "tasks": [
+    {
+      "label": "Serve site locally",
+      "type": "shell",
+      "command": "py -m http.server 8000",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "inAgents": true
+    }
+  ]
+}
