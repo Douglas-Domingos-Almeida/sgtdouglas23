@@ -3,11 +3,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const mainNavigation = document.querySelector('.main-nav');
 
   if (menuToggle && mainNavigation) {
+    const closeMenu = (restoreFocus = false) => {
+      mainNavigation.classList.remove('is-open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      menuToggle.setAttribute('aria-label', 'Abrir menu');
+
+      if (restoreFocus) menuToggle.focus();
+    };
+
     menuToggle.addEventListener('click', () => {
       const isOpen = mainNavigation.classList.toggle('is-open');
       menuToggle.setAttribute('aria-expanded', String(isOpen));
       menuToggle.setAttribute('aria-label', isOpen ? 'Fechar menu' : 'Abrir menu');
+
+      if (isOpen) {
+        const firstLink = mainNavigation.querySelector('a');
+        if (firstLink) firstLink.focus();
+      } else {
+        menuToggle.focus();
+      }
     });
+
+    mainNavigation.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeMenu(true);
+    });
+
+    window.closeMainNavigation = closeMenu;
   }
 
   const heroVideo = document.querySelector('.hero-video');
@@ -42,6 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const newsGrid = document.querySelector('#newsGrid');
 
   if (newsGrid) {
+    const carousel = newsGrid.closest('.blog-carousel');
+    const previousButton = carousel?.querySelector('.carousel-button-prev');
+    const nextButton = carousel?.querySelector('.carousel-button-next');
+    let carouselIndex = 0;
+
     const newsItems = [
       {
         id: 1,
@@ -68,6 +94,29 @@ document.addEventListener('DOMContentLoaded', () => {
         ariaLabel: 'Captação de Recursos Criativa'
       }
     ];
+
+    function getVisibleCardCount() {
+      if (window.matchMedia('(max-width: 680px)').matches) return 1;
+      if (window.matchMedia('(max-width: 900px)').matches) return 2;
+      return 3;
+    }
+
+    function updateCarousel() {
+      const visibleCardCount = getVisibleCardCount();
+      const maxIndex = Math.max(0, newsItems.length - visibleCardCount);
+      carouselIndex = Math.min(carouselIndex, maxIndex);
+
+      newsGrid.style.setProperty('--carousel-index', carouselIndex);
+      if (previousButton) previousButton.disabled = carouselIndex === 0;
+      if (nextButton) nextButton.disabled = carouselIndex >= maxIndex;
+    }
+
+    function moveCarousel(direction) {
+      const visibleCardCount = getVisibleCardCount();
+      const maxIndex = Math.max(0, newsItems.length - visibleCardCount);
+      carouselIndex = Math.max(0, Math.min(carouselIndex + direction, maxIndex));
+      updateCarousel();
+    }
 
     function renderNewsCards() {
       newsGrid.innerHTML = newsItems.map((item) => `
@@ -98,7 +147,48 @@ document.addEventListener('DOMContentLoaded', () => {
       `).join('');
 
       bindToolbarEvents();
+      updateCarousel();
     }
+
+    previousButton?.addEventListener('click', () => {
+      moveCarousel(-1);
+    });
+
+    nextButton?.addEventListener('click', () => {
+      moveCarousel(1);
+    });
+
+    window.addEventListener('resize', updateCarousel);
+
+    let touchStartX = null;
+
+    carousel?.querySelector('.blog-carousel-viewport')?.addEventListener('touchstart', (event) => {
+      touchStartX = event.changedTouches[0].clientX;
+    }, { passive: true });
+
+    carousel?.querySelector('.blog-carousel-viewport')?.addEventListener('touchend', (event) => {
+      if (touchStartX === null) return;
+
+      const touchDistance = event.changedTouches[0].clientX - touchStartX;
+      touchStartX = null;
+
+      if (Math.abs(touchDistance) < 40) return;
+      moveCarousel(touchDistance < 0 ? 1 : -1);
+    }, { passive: true });
+
+    document.addEventListener('keydown', (event) => {
+      if (!carousel || (!carousel.matches(':hover') && !carousel.contains(document.activeElement))) return;
+
+      if (event.key === 'ArrowLeft' && previousButton && !previousButton.disabled) {
+        event.preventDefault();
+        previousButton.click();
+      }
+
+      if (event.key === 'ArrowRight' && nextButton && !nextButton.disabled) {
+        event.preventDefault();
+        nextButton.click();
+      }
+    });
 
     function bindToolbarEvents() {
       const imageFrames = document.querySelectorAll('.news-image-frame');
@@ -213,6 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (faqButton && faqIcon) {
           faqButton.setAttribute('aria-expanded', 'false');
+          const faqAnswer = faqItem.querySelector('.transformar-faq__answer');
+          if (faqAnswer) faqAnswer.setAttribute('aria-hidden', 'true');
           faqIcon.textContent = '+';
         }
       });
@@ -220,6 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!isActive) {
         item.classList.add('active');
         button.setAttribute('aria-expanded', 'true');
+        const answer = item.querySelector('.transformar-faq__answer');
+        if (answer) answer.setAttribute('aria-hidden', 'false');
         icon.textContent = '−';
       }
     });
@@ -256,6 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const isCurrent = view === activeView;
       view.classList.toggle('is-hidden', !isCurrent);
       view.setAttribute('aria-hidden', String(!isCurrent));
+      view.inert = !isCurrent;
     });
 
     navLinks.forEach((link) => {
@@ -296,6 +391,15 @@ document.addEventListener('DOMContentLoaded', () => {
       event.preventDefault();
       window.location.hash = route;
       showView(route);
+
+      if (window.closeMainNavigation) window.closeMainNavigation();
+
+      const activeView = document.querySelector(`.view[data-view="${route}"]`);
+      const heading = activeView?.querySelector('h1, h2');
+      if (heading) {
+        heading.setAttribute('tabindex', '-1');
+        heading.focus();
+      }
     });
   });
 
