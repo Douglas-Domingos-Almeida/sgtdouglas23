@@ -31,7 +31,16 @@
             <a class="site-header__submenu-link" href="#resultado-complemento">Complemento</a>
           </div>
         </div>
-        <a href="#noticias" class="site-header__link" data-route="noticias">Notícias</a>
+        <div class="site-header__submenu">
+          <button class="site-header__link site-header__submenu-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="register-submenu">
+            Cadastro
+            <span class="site-header__submenu-chevron" aria-hidden="true">&#9662;</span>
+          </button>
+          <div class="site-header__submenu-panel" id="register-submenu" hidden>
+            <a class="site-header__submenu-link" href="#noticias" data-route="noticias">Notícias</a>
+            <a class="site-header__submenu-link" href="#proximos-eventos">Evento</a>
+          </div>
+        </div>
         <a href="#recursos" class="site-header__link">Sobre Nós</a>
         <a href="#voluntarios" class="site-header__link">Calendário</a>
       </nav>

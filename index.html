@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Projeto UCA</title>
-  <link rel="stylesheet" href="css/style-modern.css?v=20261012-news-previews-4">
+  <link rel="stylesheet" href="css/style-modern.css?v=20261014-register-menu">
 </head>
 <body>
   <!-- Classes do topo: site-header controla a barra; site-header__navigation e button--header recebem o contraste escuro. -->
@@ -31,7 +31,16 @@
             <a class="site-header__submenu-link" href="#resultado-complemento">Complemento</a>
           </div>
         </div>
-        <a href="#noticias" class="site-header__link" data-route="noticias">Notícias</a>
+        <div class="site-header__submenu">
+          <button class="site-header__link site-header__submenu-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="register-submenu">
+            Cadastro
+            <span class="site-header__submenu-chevron" aria-hidden="true">&#9662;</span>
+          </button>
+          <div class="site-header__submenu-panel" id="register-submenu" hidden>
+            <a class="site-header__submenu-link" href="#noticias" data-route="noticias">Notícias</a>
+            <a class="site-header__submenu-link" href="#proximos-eventos">Evento</a>
+          </div>
+        </div>
         <a href="#atualizacoes" class="site-header__link">Sobre Nós</a>
         <a href="#cadastro" class="site-header__link" data-route="cadastro">Calendário</a>
       </nav>
@@ -55,7 +64,7 @@
       <p class="site-search__status" role="status" hidden></p>
     </form>  </header>
 
-  <script src="js/main.js"></script>
+  <script src="js/main.js?v=20261014-register-menu-2"></script>
   <script src="js/news.js?v=20261012-news-previews-2" defer></script>
 
   <main class="page-home page__view page" data-view="home" aria-hidden="false">

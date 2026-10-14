@@ -1463,8 +1463,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const targetSection = document.getElementById(hash);
     if (targetSection) {
-      targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const homeView = document.querySelector('.page__view[data-view="home"]');
+      const homeWasHidden = homeView.classList.contains('page__view--hidden');
       showView('home');
+      // A home só atinge a altura final depois da transição de max-height (0.45s).
+      setTimeout(() => targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' }), homeWasHidden ? 480 : 0);
       return;
     }
 
