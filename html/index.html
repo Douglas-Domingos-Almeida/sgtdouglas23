@@ -1,66 +1,161 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ONG Transformar</title>
-  <link rel="stylesheet" href="../css/style-modern.css">
+  <title>Projeto UCA</title>
+  <link rel="stylesheet" href="../css/style-modern.css?v=20261012-news-previews">
 </head>
 <body>
-  <!-- Classes do topo: site-header controla a barra; main-nav e header-button recebem o contraste escuro. -->
+  <!-- Classes do topo: site-header controla a barra; site-header__navigation e button--header recebem o contraste escuro. -->
   <header class="site-header">
-    <a class="brand-link" href="#" aria-label="Transformar - início">
-      <img class="logo" src="../imagens/logo-ong-transformar.jpg" alt="Logo da ONG Transformar">
+    <a class="site-header__brand" href="#" aria-label="Transformar - início">
+      <span class="site-header__brand-tagline">ORGULHO DE SER!</span>
+      <img class="logo" src="../imagens/Simbolo%20da%20UCA%20(1).png" alt="Símbolo da UCA">
     </a>
 
-    <div class="header-actions">
-      <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-controls="main-navigation" aria-expanded="false">
+    <div class="site-header__actions">
+      <button class="site-header__menu-toggle" type="button" aria-label="Abrir menu" aria-controls="main-navigation" aria-expanded="false">
         <span aria-hidden="true">☰</span>
       </button>
 
-      <nav class="main-nav" id="main-navigation" aria-label="Navegação principal">
-        <a href="#home" class="nav-link active" data-route="home">Home</a>
-        <a href="#projetos" class="nav-link">Projetos</a>
-        <a href="#recursos" class="nav-link">Recursos</a>
-        <a href="#voluntarios" class="nav-link">Voluntários</a>
+      <nav class="site-header__navigation" id="main-navigation" aria-label="Navegação principal">
+                <div class="site-header__submenu">
+          <button class="site-header__link site-header__submenu-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="results-submenu">
+            Resultado
+            <span class="site-header__submenu-chevron" aria-hidden="true">&#9662;</span>
+          </button>
+          <div class="site-header__submenu-panel" id="results-submenu" hidden>
+            <a class="site-header__submenu-link" href="#resultado-ranking">Ranking</a>
+            <a class="site-header__submenu-link" href="#resultado-historico">Histórico</a>
+            <a class="site-header__submenu-link" href="#resultado-complemento">Complemento</a>
+          </div>
+        </div>
+        <a href="#noticias" class="site-header__link" data-route="noticias">Notícias</a>
+        <a href="#recursos" class="site-header__link">Sobre Nós</a>
+        <a href="#voluntarios" class="site-header__link">Calendário</a>
       </nav>
 
-      <a class="header-button" href="#cadastro" data-route="cadastro">Doar Agora</a>
+      <button class="site-header__search-toggle" type="button" aria-label="Pesquisar" aria-expanded="false" aria-controls="site-search">
+        <svg class="site-header__search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+          <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/>
+          <path d="M15.5 15.5 21 21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <a class="button--header button" href="#cadastro" data-route="cadastro">Junte se a Nós</a>
     </div>
-  </header>
+    <form class="site-search" id="site-search" role="search" aria-label="Pesquisar no site" hidden>
+      <input class="site-search__input" id="site-search-input" name="q" type="search" placeholder="Pesquisar no site..." aria-label="Pesquisar no site" autocomplete="off">
+      <button class="site-search__submit" type="submit" aria-label="Buscar">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5 21 21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="site-search__close" type="button" aria-label="Fechar pesquisa">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <p class="site-search__status" role="status" hidden></p>
+    </form>  </header>
 
   <script src="../js/main.js"></script>
+  <script src="../js/news.js?v=20261012-news-previews-2" defer></script>
 
-  <main class="page-home view" data-view="home" aria-hidden="false">
-    <!-- Classes do hero: hero-section define o grid; hero-media mantém a imagem vertical; hero-copy concentra a mensagem. -->
-    <section class="hero-section" id="inicio" aria-labelledby="hero-title">
-      <div class="hero-media">
-        <div class="hero-photo-frame">
-          <video class="hero-video" autoplay muted loop playsinline aria-label="Vídeo institucional da ONG Transformar">
-            <source src="../imagens/video-ong-transformar.mp4" type="video/mp4">
-            Seu navegador não suporta vídeos.
+  <main class="page-home page__view page" data-view="home" aria-hidden="false">
+    <section class="juntos-podemos-videos" id="inicio" aria-label="Atletismo Master">
+      <header class="juntos-podemos-videos__header">
+        <span class="juntos-podemos-videos__eyebrow">Atletismo Master</span>
+        <p>A UCA reúne notícia, humor, entretenimento em torno do esporte master, amizade e de conquistas de nosso time.</p>
+      </header>
+
+      <div class="juntos-podemos-videos__feature">
+        <div class="juntos-podemos-videos__main">
+          <video class="juntos-podemos-videos__main-player" controls playsinline preload="metadata" aria-label="Velocista de Blumenau é dono da melhor marca do mundo na categoria master">
+            <source type="video/mp4">
+            Seu navegador não suporta a reprodução de vídeos.
           </video>
+          <h2 class="juntos-podemos-videos__main-title" data-main-video-title>Velocista de Blumenau é dono da melhor marca do mundo na categoria master</h2>
+          <p class="juntos-podemos-videos__status" data-main-video-status role="status" hidden></p>
         </div>
+
+        <aside class="juntos-podemos-videos__info" aria-labelledby="juntos-podemos-videos-info-title">
+          <span class="juntos-podemos-videos__info-label">Nossa comunidade</span>
+          <h2 id="juntos-podemos-videos-info-title">Experiência que inspira. Movimento que transforma.</h2>
+          <p>Conheça a UCA e acompanhe histórias de superação e paixão pelo atletismo Master.</p>
+          <a class="button--primary button" href="#cadastro" data-route="cadastro">Faça parte da UCA</a>
+        </aside>
       </div>
 
-      <div class="hero-copy">
-        <h1 id="hero-title">Juntos Podemos!</h1>
-        <p class="hero-text">Transforme vidas com sua ajuda. Cada contribuição faz a diferença e aproxima mais pessoas da inclusão.</p>
-
-        <div class="hero-actions">
-          <a class="primary-button" href="#cadastro" data-route="cadastro">Junte-se a Nós</a>
+      <section class="juntos-podemos-videos__latest" aria-labelledby="juntos-podemos-videos-latest-title">
+        <div class="juntos-podemos-videos__latest-heading">
+          <div>
+            <span class="juntos-podemos-videos__eyebrow">Da pista para inspirar</span>
+            <h2 id="juntos-podemos-videos-latest-title">Últimos vídeos</h2>
+          </div>
         </div>
-      </div>
+
+        <div class="juntos-podemos-videos__gallery" aria-label="Vídeos recentes de atletismo Master">
+          <article class="juntos-podemos-videos__card">
+            <button class="juntos-podemos-videos__open" type="button" data-video-title="Bill Collins M65 world record in 100" aria-label="Reproduzir vídeo: Bill Collins M65 world record in 100">
+              <span class="juntos-podemos-videos__thumbnail">
+                <span class="juntos-podemos-videos__thumbnail-fallback" aria-hidden="true">Bill Collins • 100 m</span>
+                <video class="juntos-podemos-videos__preview" data-video-preview muted playsinline preload="none" aria-hidden="true" tabindex="-1">
+                  <source data-video-id="billCollins" type="video/mp4">
+                </video>
+                <span class="juntos-podemos-videos__play" aria-hidden="true"></span>
+              </span>
+            </button>
+            <h3>Bill Collins M65 world record in 100</h3>
+          </article>
+
+          <article class="juntos-podemos-videos__card">
+            <button class="juntos-podemos-videos__open" type="button" data-video-title="Atletismo Master velocista mais rápido das Américas é de Blumenau" aria-label="Reproduzir vídeo: Atletismo Master velocista mais rápido das Américas é de Blumenau">
+              <span class="juntos-podemos-videos__thumbnail">
+                <span class="juntos-podemos-videos__thumbnail-fallback" aria-hidden="true">Velocidade • Blumenau</span>
+                <video class="juntos-podemos-videos__preview" data-video-preview muted playsinline preload="none" aria-hidden="true" tabindex="-1">
+                  <source data-video-id="atletismoBlumenau" type="video/mp4">
+                </video>
+                <span class="juntos-podemos-videos__play" aria-hidden="true"></span>
+              </span>
+            </button>
+            <h3>Atletismo Master velocista mais rápido das Américas é de Blumenau</h3>
+          </article>
+
+          <article class="juntos-podemos-videos__card">
+            <button class="juntos-podemos-videos__open" type="button" data-video-title="Recorde mundial de Bill Collins na categoria M65 nos 100 metros" aria-label="Reproduzir vídeo: Recorde mundial de Bill Collins na categoria M65 nos 100 metros">
+              <span class="juntos-podemos-videos__thumbnail">
+                <span class="juntos-podemos-videos__thumbnail-fallback" aria-hidden="true">Recorde mundial • 100 m</span>
+                <video class="juntos-podemos-videos__preview" data-video-preview muted playsinline preload="none" aria-hidden="true" tabindex="-1">
+                  <source data-video-id="arizona" type="video/mp4">
+                </video>
+                <span class="juntos-podemos-videos__play" aria-hidden="true"></span>
+              </span>
+            </button>
+            <h3>Arizona Masters Track 400M Sprinter Doug Thomson</h3>
+          </article>
+
+          <article class="juntos-podemos-videos__card">
+            <button class="juntos-podemos-videos__open" type="button" data-video-title="100m masculino cat 35 anos Master Pta 2022" aria-label="Reproduzir vídeo: 100m masculino cat 35 anos Master Pta 2022">
+              <span class="juntos-podemos-videos__thumbnail">
+                <span class="juntos-podemos-videos__thumbnail-fallback" aria-hidden="true">100 m • Master Pta 2022</span>
+                <video class="juntos-podemos-videos__preview" data-video-preview muted playsinline preload="none" aria-hidden="true" tabindex="-1">
+                  <source data-video-id="masterPta2022" type="video/mp4">
+                </video>
+                <span class="juntos-podemos-videos__play" aria-hidden="true"></span>
+              </span>
+            </button>
+            <h3>100m masculino cat 35 anos Master Pta 2022</h3>
+          </article>
+        </div>
+      </section>
+
     </section>
 
     <section class="section-intro" id="quem-somos">
       <div class="section-heading">
-        <span class="section-kicker">Quem Somos</span>
+        <span class="section-heading__kicker">Quem Somos</span>
         <h2>Uma rede de solidariedade com propósito.</h2>
       </div>
 
-      <div class="intro-grid">
-        <article class="intro-text">
+      <div class="section-intro__grid">
+        <article class="section-intro__text">
           <p>
             A nossa ONG é dedicada a transformar realidades por meio de projetos sociais focados em educação e inclusão.
             Buscamos construir um futuro mais justo e com oportunidades para todos.
@@ -69,26 +164,26 @@
             Através de ações locais, apoio pedagógico e trabalho comunitário, conectamos pessoas, instituições e recursos para fortalecer o bem-estar de crianças, jovens e famílias.
           </p>
 
-          <div class="intro-feature-list">
+          <div class="section-intro__feature-list">
             <div class="feature-item">
-              <span class="feature-icon">◎</span>
+              <span class="feature-item__icon">◎</span>
               <span>Educação para todos</span>
             </div>
             <div class="feature-item">
-              <span class="feature-icon">✎</span>
+              <span class="feature-item__icon">✎</span>
               <span>Inclusão social</span>
             </div>
             <div class="feature-item">
-              <span class="feature-icon">♥</span>
+              <span class="feature-item__icon">♥</span>
               <span>Comunidade ativa</span>
             </div>
           </div>
         </article>
 
         <aside class="intro-card">
-          <div class="intro-card-title">Nossa Missão</div>
+          <div class="intro-card__title">Nossa Missão</div>
           <p>Promover oportunidades reais por meio de educação, acolhimento e transformação social.</p>
-          <div class="mission-points">
+          <div class="intro-card__points">
             <span>• Acesso educacional</span>
             <span>• Inclusão comunitária</span>
             <span>• Fortalecimento humano</span>
@@ -104,37 +199,36 @@
         muted
         loop
         playsinline
-        poster="assets/img/uniao.png"
-        aria-label="Vídeo institucional da ONG Transformar"
+        aria-label="Video UCA"
       >
-        <source src="../imagens/video-ong-transformar(1).mp4" type="video/mp4">
+        <source src="../Videos/Video%20UCA.mp4" type="video/mp4">
       </video>
 
       <div class="transformar-uniao__ticker" aria-label="Destaques da ONG Transformar">
         <div class="transformar-uniao__track">
           <div class="transformar-uniao__content">
-            <span>EDUCAÇÃO PARA TODOS</span>
+            <span>NÃO SOMOS NEM MELHORES E NEM PIOR, SOMOS APENAS DIFERENTES!</span>
             <span class="transformar-uniao__separator">•</span>
-            <span>INCLUSÃO SOCIAL</span>
+            <span>NOSSA FORÇA VEM DE NOSSA UNIÃO!</span>
             <span class="transformar-uniao__separator">•</span>
-            <span>OPORTUNIDADES</span>
+            <span>AMIZADE É A NOSSA FORÇA</span>
             <span class="transformar-uniao__separator">•</span>
-            <span>VOLUNTARIADO</span>
+            <span>ONDE A IDADE VIRA CONQUISTA!</span>
             <span class="transformar-uniao__separator">•</span>
-            <span>TRANSFORMAÇÃO DE VIDAS</span>
+            <span>ORGULHO DE SER UCA!</span>
             <span class="transformar-uniao__separator">•</span>
           </div>
 
           <div class="transformar-uniao__content" aria-hidden="true">
-            <span>EDUCAÇÃO PARA TODOS</span>
+            <span>NÃO SOMOS NEM MELHORES E NEM PIOR, SOMOS APENAS DIFERENTES!</span>
             <span class="transformar-uniao__separator">•</span>
-            <span>INCLUSÃO SOCIAL</span>
+            <span>NOSSA FORÇA VEM DE NOSSA UNIÃO!</span>
             <span class="transformar-uniao__separator">•</span>
-            <span>OPORTUNIDADES</span>
+            <span>AMIZADE É A NOSSA FORÇA</span>
             <span class="transformar-uniao__separator">•</span>
-            <span>VOLUNTARIADO</span>
+            <span>ONDE A IDADE VIRA CONQUISTA!</span>
             <span class="transformar-uniao__separator">•</span>
-            <span>TRANSFORMAÇÃO DE VIDAS</span>
+            <span>ORGULHO DE SER UCA!</span>
             <span class="transformar-uniao__separator">•</span>
           </div>
         </div>
@@ -142,47 +236,71 @@
     </section>
 
     <section class="news-section" id="atualizacoes">
-      <div class="news-header-row">
-        <div class="news-heading-block">
-          <span class="news-tag">Blog</span>
-          <h2>Novas Últimas<br>Atualizações</h2>
+      <div class="news-section__header">
+        <div class="news-section__heading">
+          <span class="news-section__tag">Blog</span>
+          <h2>Últimas Notícias</h2>
         </div>
-        <a class="news-button" href="#blog">Leia Mais</a>
+        <a class="news-section__button" href="#noticias" aria-label="Ver todas as notícias">Ver todas as notícias</a>
       </div>
 
-      <p class="news-intro">Fique por dentro das nossas novidades e histórias emocionantes.</p>
+      <p class="news-section__intro">Fique por dentro das nossas novidades e histórias emocionantes.</p>
 
-      <div class="news-grid" id="newsGrid" aria-live="polite"></div>
+      <p class="news-home__status" id="homeNewsStatus" role="status" aria-live="polite">Carregando notícias...</p>
+      <div class="news-card-grid news-card-grid--home" id="homeNewsGrid" aria-live="polite" aria-busy="true"></div>
+    </section>
+
+    <section class="news-section" id="proximos-eventos" aria-labelledby="upcoming-events-title">
+      <div class="news-section__header">
+        <div class="news-section__heading">
+          <span class="news-section__tag">Eventos</span>
+          <h2 id="upcoming-events-title">Proximos Eventos</h2>
+        </div>
+        <a class="news-section__button" href="#contato" aria-label="Entre em contato para saber sobre os próximos eventos">Entre em contato</a>
+      </div>
+
+      <p class="news-section__intro">Acompanhe aqui as informações dos nossos próximos eventos.</p>
+      <div class="news-carousel">
+        <button class="news-carousel__button news-carousel__button--previous" type="button" aria-label="Ver eventos anteriores" disabled>
+          <span class="news-carousel__chevron news-carousel__chevron--left" aria-hidden="true"></span>
+        </button>
+        <div class="news-carousel__viewport">
+          <div class="news-carousel__track" id="eventsGrid" aria-live="polite"></div>
+        </div>
+        <button class="news-carousel__button news-carousel__button--next" type="button" aria-label="Ver próximos eventos">
+          <span class="news-carousel__chevron news-carousel__chevron--right" aria-hidden="true"></span>
+        </button>
+      </div>
     </section>
 
     <section class="contact-section" id="contato">
-      <div class="section-heading centered">
-        <span class="section-kicker">Contato</span>
+      <div class="section-heading section-heading--centered">
+        <span class="section-heading__kicker">Contato</span>
         <h2>Entre em contato com a ONG</h2>
       </div>
 
-      <div class="contact-grid">
+      <div class="contact-section__grid">
         <article class="contact-card">
-          <div class="contact-card-icon">✉</div>
-          <div class="contact-card-content">
-            <span class="contact-label">E-mail</span>
-            <span class="contact-value">contato@ongtransformar.org</span>
+          <div class="contact-card__icon">✉</div>
+          <div class="contact-card__content">
+            <span class="contact-card__label">E-mail</span>
+            <span class="contact-card__value">contato@ongtransformar.org</span>
           </div>
         </article>
 
         <article class="contact-card">
-          <div class="contact-card-icon">☎</div>
-          <div class="contact-card-content">
-            <span class="contact-label">Telefone</span>
-            <span class="contact-value">(11) 98765-4321</span>
+          <div class="contact-card__icon">☎</div>
+          <div class="contact-card__content">
+            <span class="contact-card__label">Telefone</span>
+            <span class="contact-card__value">(11) 98765-4321</span>
           </div>
         </article>
 
         <article class="contact-card">
-          <div class="contact-card-icon">⌕</div>
-          <div class="contact-card-content">
-            <span class="contact-label">Endereço</span>
-            <span class="contact-value">Rua da Solidariedade, 123 — São Paulo, SP</span>
+          <div class="contact-card__icon">⌕</div>
+          <div class="contact-card__content">
+            <span class="contact-card__label">Endereço</span>
+            <span class="contact-card__value">Rua da Solidariedade, 123 — São Paulo, SP</span>
           </div>
         </article>
       </div>
@@ -191,8 +309,8 @@
     <section class="transformar-faq" aria-labelledby="faq-title">
       <div class="transformar-faq__container">
         <div class="transformar-faq__brand" aria-label="Logo da ONG Transformar">
-          <img src="../imagens/logo-ong-transformar.jpg" alt="Logo da ONG Transformar" class="transformar-faq__logo">
-          <p class="transformar-faq__tagline">Juntos por um futuro melhor</p>
+          <img src="../imagens/Simbolo%20da%20UCA%20(1).png" alt="Símbolo da UCA" class="transformar-faq__logo">
+          <p class="transformar-faq__tagline">Uma vez UCA, sempre UCA!</p>
         </div>
 
         <div class="transformar-faq__content">
@@ -203,12 +321,26 @@
             <article class="transformar-faq__item">
               <button class="transformar-faq__question" type="button" aria-expanded="false" aria-controls="faq-answer-01">
                 <span class="transformar-faq__number">01</span>
-                <span class="transformar-faq__text">Como posso me tornar voluntário?</span>
+                <span class="transformar-faq__text">Como posso me associar a UCA Master?</span>
                 <span class="transformar-faq__icon" aria-hidden="true">+</span>
               </button>
               <div id="faq-answer-01" class="transformar-faq__answer">
                 <div class="transformar-faq__answer-inner">
-                  Você pode fazer parte da ONG Transformar participando de nossas ações, projetos e atividades comunitárias. Entre em contato conosco para conhecer as oportunidades de voluntariado disponíveis.
+                  <p>Você é atleta Master de Santa Catarina e pode associar-se à UCA realizando seu cadastro pelo site da AMASTER-SC: <a href="https://www.amaster-sc.com.br" target="_blank" rel="noopener noreferrer">https://www.amaster-sc.com.br</a>.</p>
+                  <p>Atletas sem registro na ABRAM (cadastro BRA) deverão preencher a ficha de cadastro com todos os dados solicitados, foto e assinatura, e enviá-la pelo formulário: <a href="https://forms.gle/LvkegxJKSz4T9cTbA" target="_blank" rel="noopener noreferrer">https://forms.gle/LvkegxJKSz4T9cTbA</a>. A ficha será assinada pelo presidente da AMASTER-SC e encaminhada à ABRAM para emissão da carteira.</p>
+                  <p><strong>Anuidades:</strong></p>
+                  <ul>
+                    <li>ABRAM: R$ 75,00</li>
+                    <li>AMASTER-SC: R$ 125,00</li>
+                  </ul>
+                  <p>O comprovante de pagamento deverá ser enviado à diretoria da AMASTER-SC.</p>
+                  <p><strong>Dados bancários:</strong><br>
+                  <strong>AMASTER-SC – Associação Master de Santa Catarina</strong><br>
+                  Caixa Econômica Federal<br>
+                  Conta Corrente: 000572187856-4<br>
+                  Operação: 1292<br>
+                  CNPJ: 08.600.662/0001-04</p>
+                  <p><strong>PIX:</strong> CNPJ 08.600.662/0001-04</p>
                 </div>
               </div>
             </article>
@@ -283,85 +415,87 @@
     </section>
 
     <section class="cadastro-section" id="cadastro">
-      <div class="cadastro-article">
-        <div class="cadastro-copy">
-          <span class="section-kicker">Faça Parte</span>
-          <h2>Seja um Amigo da ONG</h2>
+      <div class="cadastro-section__article">
+        <div class="cadastro-section__copy">
+          <span class="section-heading__kicker">Faça Parte</span>
+          <h2>Faça Parte de Nosso Time!</h2>
           <p>
-            Quer fazer parte da nossa rede de apoio? Preencha a ficha de cadastro para se tornar um Amigo da ONG Transformar.
+            Quer fazer parte do nosso time? Preencha a ficha de cadastro para se tornar parte do nosso time.
           </p>
-          <a href="#cadastro" class="primary-button wide-button" data-route="cadastro">
-            Cadastro de Amigo da ONG
+          <a href="#cadastro" class="button--primary button--wide button" data-route="cadastro">
+            Cadastro de Amigo da UCA Master
           </a>
         </div>
 
-        <div class="cadastro-aside">
+        <div class="cadastro-section__aside">
           <div class="floating-card">
-            <span class="floating-card-label">Voluntariado</span>
-            <span class="floating-card-number">03</span>
-            <span class="floating-card-text">programas ativos</span>
+            <span class="floating-card__label">Voluntariado</span>
+            <span class="floating-card__number">03</span>
+            <span class="floating-card__text">programas ativos</span>
           </div>
         </div>
       </div>
     </section>
-  </main>
 
-  <section class="page-cadastro view is-hidden" data-view="cadastro" aria-hidden="true">
+    <section class="page-cadastro page__view page__view--hidden page" data-view="cadastro" aria-hidden="true">
     <section class="registration-card" aria-labelledby="page-title">
-      <section class="registration-hero">
-        <figure class="registration-brand">
-          <img src="../imagens/logo-ong-transformar.jpg" alt="ONG Transformar" class="logo">
+      <section class="registration-card__hero">
+        <figure class="registration-card__brand">
+          <img src="../imagens/Simbolo%20da%20UCA%20(1).png" alt="Símbolo da UCA" class="logo">
         </figure>
 
-        <span class="registration-divider" aria-hidden="true"></span>
+        <span class="registration-card__divider" aria-hidden="true"></span>
 
-        <section class="registration-content">
-          <span class="section-kicker">Seja parte do projeto</span>
+        <section class="registration-card__content">
+          <span class="section-heading__kicker">Seja parte do projeto</span>
           <h1 id="page-title">Cadastro de <span>Voluntário</span></h1>
           <p>Preencha seus dados e faça parte dessa transformação!</p>
         </section>
       </section>
 
-      <article class="form-wrapper">
-        <section class="form-panel">
+      <article class="registration-card__form-wrapper">
+        <section class="registration-card__form-panel">
           <form class="volunteer-form">
-            <fieldset class="form-fieldset">
+            <fieldset class="volunteer-form__fieldset">
               <legend>Dados pessoais</legend>
 
-              <div class="field-group">
+              <div class="volunteer-form__field">
                 <label for="nome">Nome completo <span>*</span></label>
-                <div class="input-with-icon">
-                  <div class="icon-box" aria-hidden="true">👤</div>
-                  <input id="nome" name="nome" type="text" placeholder="Digite seu nome completo" required pattern="^[A-Za-zÀ-ÿ]+(?:\s[A-Za-zÀ-ÿ]+)+$" title="Informe o nome completo com pelo menos duas partes." minlength="3">
+                <div class="volunteer-form__input-wrap">
+                  <div class="volunteer-form__icon" aria-hidden="true">👤</div>
+                  <input id="nome" name="nome" type="text" placeholder="Digite seu nome completo" required pattern="^[A-Za-zÀ-ÿ]+(?:\s[A-Za-zÀ-ÿ]+)+$" aria-describedby="nome-ajuda" title="Informe o nome completo com pelo menos duas partes." minlength="3">
                 </div>
+                <small class="volunteer-form__hint" id="nome-ajuda">Informe o nome completo com pelo menos duas partes.</small>
               </div>
 
-              <div class="form-row">
-                <div class="field-group">
+              <div class="volunteer-form__row">
+                <div class="volunteer-form__field">
                   <label for="email">E-mail <span>*</span></label>
-                  <div class="input-with-icon">
-                    <div class="icon-box" aria-hidden="true">✉</div>
-                    <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" required pattern="^[^\s@]+@[^\s@]+\.[^\s@]{2,}$" title="Informe um e-mail válido no formato nome@dominio.com">
+                  <div class="volunteer-form__input-wrap">
+                    <div class="volunteer-form__icon" aria-hidden="true">✉</div>
+                    <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" required pattern="^[^\s@]+@[^\s@]+\.[^\s@]{2,}$" aria-describedby="email-ajuda" title="Informe um e-mail válido no formato nome@dominio.com">
                   </div>
+                  <small class="volunteer-form__hint" id="email-ajuda">Formato esperado: nome@dominio.com.</small>
                 </div>
 
-                <div class="field-group">
+                <div class="volunteer-form__field">
                   <label for="telefone">Telefone <span>*</span></label>
-                  <div class="input-with-icon">
-                    <div class="icon-box" aria-hidden="true">☎</div>
-                    <input id="telefone" name="telefone" type="tel" placeholder="(00) 00000-0000" required pattern="^\(\d{2}\)\s?\d{4,5}-\d{4}$" title="Informe o telefone no formato (00) 00000-0000">
+                  <div class="volunteer-form__input-wrap">
+                    <div class="volunteer-form__icon" aria-hidden="true">☎</div>
+                    <input id="telefone" name="telefone" type="tel" placeholder="(00) 00000-0000" required pattern="^\(\d{2}\)\s?\d{4,5}-\d{4}$" aria-describedby="telefone-ajuda" title="Informe o telefone no formato (00) 00000-0000">
                   </div>
+                  <small class="volunteer-form__hint" id="telefone-ajuda">Formato esperado: (00) 00000-0000.</small>
                 </div>
               </div>
             </fieldset>
 
-            <fieldset class="form-fieldset">
+            <fieldset class="volunteer-form__fieldset">
               <legend>Disponibilidade e interesse</legend>
 
-              <div class="field-group">
+              <div class="volunteer-form__field">
                 <label for="disponibilidade">Disponibilidade <span>*</span></label>
-                <div class="input-with-icon select-wrapper">
-                  <div class="icon-box" aria-hidden="true">☼</div>
+                <div class="volunteer-form__input-wrap volunteer-form__input-wrap--select">
+                  <div class="volunteer-form__icon" aria-hidden="true">☼</div>
                   <select id="disponibilidade" name="disponibilidade" required>
                     <option value="" selected disabled>Selecione sua disponibilidade</option>
                     <option>Durante a semana</option>
@@ -370,14 +504,14 @@
                     <option>Tarde</option>
                     <option>Noite</option>
                   </select>
-                  <span class="chevron"></span>
+                  <span class="volunteer-form__chevron"></span>
                 </div>
               </div>
 
-              <div class="field-group">
+              <div class="volunteer-form__field">
                 <label for="areas">Áreas de interesse <span>*</span></label>
-                <div class="input-with-icon select-wrapper">
-                  <div class="icon-box" aria-hidden="true">✦</div>
+                <div class="volunteer-form__input-wrap volunteer-form__input-wrap--select">
+                  <div class="volunteer-form__icon" aria-hidden="true">✦</div>
                   <select id="areas" name="areas" required>
                     <option value="" selected disabled>Selecione uma ou mais áreas</option>
                     <option>Educação</option>
@@ -386,47 +520,48 @@
                     <option>Comunicação</option>
                     <option>Administrativo</option>
                   </select>
-                  <span class="chevron"></span>
+                  <span class="volunteer-form__chevron"></span>
                 </div>
               </div>
 
-              <div class="field-group">
+              <div class="volunteer-form__field">
                 <label for="mensagem">Mensagem (opcional)</label>
-                <div class="input-with-icon textarea-wrapper">
-                  <div class="icon-box" aria-hidden="true">✎</div>
-                  <textarea id="mensagem" name="mensagem" placeholder="Conte um pouco sobre você e sua motivação para ser um voluntário..."></textarea>
+                <div class="volunteer-form__input-wrap volunteer-form__input-wrap--textarea">
+                  <div class="volunteer-form__icon" aria-hidden="true">✎</div>
+                  <textarea id="mensagem" name="mensagem" aria-describedby="mensagem-ajuda"></textarea>
                 </div>
+                <small class="volunteer-form__hint" id="mensagem-ajuda">Conte um pouco sobre você e sua motivação para ser voluntário.</small>
               </div>
             </fieldset>
 
-            <button type="submit" class="submit-button">
-              <span class="send-icon">➤</span>
+            <button type="submit" class="volunteer-form__submit" aria-label="Enviar Cadastro de Voluntário">
+              <span class="volunteer-form__send-icon">➤</span>
               <span>Enviar Cadastro</span>
             </button>
 
-            <p class="security-note">
-              <span class="lock-icon">🔒</span>
+            <p class="volunteer-form__security-note">
+              <span class="volunteer-form__lock-icon">🔒</span>
               <span>Seus dados estão seguros. Utilizamos suas informações apenas para fins institucionais.</span>
             </p>
           </form>
 
           <section class="feedback-showcase" aria-labelledby="feedback-title">
-            <div class="feedback-heading">
-              <span class="section-kicker">Retorno imediato</span>
+            <div class="feedback-showcase__heading">
+              <span class="section-heading__kicker">Retorno imediato</span>
               <h2 id="feedback-title">Microinterações de atendimento</h2>
               <p>Mensagens curtas orientam o próximo passo sem interromper a tarefa.</p>
             </div>
 
-            <div class="feedback-alerts">
-              <div class="feedback-alert feedback-alert-success" role="status">
-                <span class="feedback-alert-icon" aria-hidden="true">✓</span>
+            <div class="feedback-showcase__alerts">
+              <div class="feedback-alert feedback-alert--success" role="status">
+                <span class="feedback-alert__icon" aria-hidden="true">✓</span>
                 <div>
                   <strong>Cadastro pronto para envio</strong>
                   <span>Todos os campos obrigatórios foram preenchidos.</span>
                 </div>
               </div>
-              <div class="feedback-alert feedback-alert-warning" role="alert">
-                <span class="feedback-alert-icon" aria-hidden="true">!</span>
+              <div class="feedback-alert feedback-alert--warning" role="alert">
+                <span class="feedback-alert__icon" aria-hidden="true">!</span>
                 <div>
                   <strong>Confira seus dados</strong>
                   <span>Revise os campos destacados antes de continuar.</span>
@@ -434,107 +569,239 @@
               </div>
             </div>
 
-            <div class="feedback-demo-row">
-              <span class="feedback-label">Etiquetas ativas</span>
-              <div class="feedback-badges" aria-label="Categorias de projetos">
-                <span class="feedback-badge feedback-badge-green">Educação</span>
-                <span class="feedback-badge feedback-badge-blue">Inclusão</span>
-                <span class="feedback-badge feedback-badge-orange">Prioridade</span>
+            <div class="feedback-showcase__demo-row">
+              <span class="feedback-showcase__label">Etiquetas ativas</span>
+              <div class="feedback-showcase__badges" aria-label="Categorias de projetos">
+                <span class="feedback-badge feedback-badge--green">Educação</span>
+                <span class="feedback-badge feedback-badge--blue">Inclusão</span>
+                <span class="feedback-badge feedback-badge--orange">Prioridade</span>
               </div>
-              <button class="feedback-toast-trigger" type="button">Mostrar toast</button>
+              <button class="feedback-showcase__toast-trigger" type="button" aria-label="Mostrar toast de confirmação">Mostrar toast</button>
             </div>
           </section>
         </section>
 
         <aside class="volunteer-aside">
-          <div class="volunteer-aside-card">
-            <span class="volunteer-aside-tag">Programa Voluntariado</span>
-            <h3 class="volunteer-aside-title">Transformar com ação</h3>
+          <div class="volunteer-aside__card">
+            <span class="volunteer-aside__tag">Programa Voluntariado</span>
+            <h2 class="volunteer-aside__title">Transformar com ação</h2>
 
-            <div class="volunteer-aside-image">
+            <div class="volunteer-aside__image">
               <img src="../imagens/institucional-ong.jpg" alt="Trabalho voluntário em educação e inclusão">
-              <span class="volunteer-aside-image-caption">Educação • Inclusão • Comunidade</span>
-              <span class="volunteer-aside-year">Ação Social 2026</span>
+              <span class="volunteer-aside__image-caption">Educação • Inclusão • Comunidade</span>
+              <span class="volunteer-aside__year">Ação Social 2026</span>
             </div>
 
-            <div class="volunteer-aside-line"></div>
+            <div class="volunteer-aside__line"></div>
 
-            <div class="volunteer-aside-stats">
+            <div class="volunteer-aside__stats">
               <div class="volunteer-stat">
-                <span class="volunteer-stat-number">12+</span>
-                <span class="volunteer-stat-label">ações por mês</span>
+                <span class="volunteer-stat__number">12+</span>
+                <span class="volunteer-stat__label">ações por mês</span>
               </div>
               <div class="volunteer-stat">
-                <span class="volunteer-stat-number">350</span>
-                <span class="volunteer-stat-label">voluntários ativos</span>
+                <span class="volunteer-stat__number">350</span>
+                <span class="volunteer-stat__label">voluntários ativos</span>
               </div>
               <div class="volunteer-stat">
-                <span class="volunteer-stat-number">04</span>
-                <span class="volunteer-stat-label">frentes de apoio</span>
+                <span class="volunteer-stat__number">04</span>
+                <span class="volunteer-stat__label">frentes de apoio</span>
               </div>
             </div>
 
-            <div class="timeline-panel">
-              <div class="timeline-title">Campanhas sociais</div>
-              <div class="timeline-list">
-                <div class="timeline-item">
-                  <span class="timeline-point"></span>
-                  <span class="timeline-label">Jan</span>
-                  <span class="timeline-text">Escolas em ação</span>
+            <div class="campaign-timeline">
+              <div class="campaign-timeline__title">Campanhas sociais</div>
+              <div class="campaign-timeline__list">
+                <div class="campaign-timeline__item">
+                  <span class="campaign-timeline__point"></span>
+                  <span class="campaign-timeline__label">Jan</span>
+                  <span class="campaign-timeline__text">Escolas em ação</span>
                 </div>
-                <div class="timeline-item">
-                  <span class="timeline-point"></span>
-                  <span class="timeline-label">Mar</span>
-                  <span class="timeline-text">Alimenta a esperança</span>
+                <div class="campaign-timeline__item">
+                  <span class="campaign-timeline__point"></span>
+                  <span class="campaign-timeline__label">Mar</span>
+                  <span class="campaign-timeline__text">Alimenta a esperança</span>
                 </div>
-                <div class="timeline-item">
-                  <span class="timeline-point"></span>
-                  <span class="timeline-label">Ago</span>
-                  <span class="timeline-text">Semana da inclusão</span>
+                <div class="campaign-timeline__item">
+                  <span class="campaign-timeline__point"></span>
+                  <span class="campaign-timeline__label">Ago</span>
+                  <span class="campaign-timeline__text">Semana da inclusão</span>
                 </div>
               </div>
             </div>
 
             <div class="impact-map">
-              <div class="impact-map-head">
-                <span class="impact-map-title">Território de atuação</span>
-                <span class="impact-map-icon">✧</span>
+              <div class="impact-map__head">
+                <span class="impact-map__title">Território de atuação</span>
+                <span class="impact-map__icon">✧</span>
               </div>
-              <div class="impact-map-grid">
-                <span class="impact-city city-sp">SP</span>
-                <span class="impact-city city-rj">RJ</span>
-                <span class="impact-city city-ba">BA</span>
-                <span class="impact-city city-pe">PE</span>
+              <div class="impact-map__grid">
+                <span class="impact-map__city impact-map__city--sp">SP</span>
+                <span class="impact-map__city impact-map__city--rj">RJ</span>
+                <span class="impact-map__city impact-map__city--ba">BA</span>
+                <span class="impact-map__city impact-map__city--pe">PE</span>
               </div>
             </div>
 
             <div class="campaign-status">
-              <div class="campaign-status-head">
-                <span class="campaign-status-title">Campanhas ativas</span>
-                <span class="campaign-status-number">08/10</span>
+              <div class="campaign-status__head">
+                <span class="campaign-status__title">Campanhas ativas</span>
+                <span class="campaign-status__number">08/10</span>
               </div>
-              <div class="campaign-status-track">
-                <span class="campaign-status-bar"></span>
+              <div class="campaign-status__track">
+                <span class="campaign-status__bar"></span>
               </div>
-              <div class="campaign-status-meta">
-                <span class="campaign-status-label">Nutrição</span>
-                <span class="campaign-status-label">Educação</span>
-                <span class="campaign-status-label">Inclusão</span>
+              <div class="campaign-status__meta">
+                <span class="campaign-status__label">Nutrição</span>
+                <span class="campaign-status__label">Educação</span>
+                <span class="campaign-status__label">Inclusão</span>
               </div>
             </div>
 
-            <div class="volunteer-aside-list">
-              <div class="volunteer-aside-row"><span class="row-icon">✦</span><span>Educação e inclusão</span></div>
-              <div class="volunteer-aside-row"><span class="row-icon">✦</span><span>Eventos comunitários</span></div>
-              <div class="volunteer-aside-row"><span class="row-icon">✦</span><span>Atendimento social</span></div>
+            <div class="volunteer-aside__list">
+              <div class="volunteer-aside__row"><span class="volunteer-aside__row-icon">✦</span><span>Educação e inclusão</span></div>
+              <div class="volunteer-aside__row"><span class="volunteer-aside__row-icon">✦</span><span>Eventos comunitários</span></div>
+              <div class="volunteer-aside__row"><span class="volunteer-aside__row-icon">✦</span><span>Atendimento social</span></div>
             </div>
 
-            <a href="#home" class="volunteer-aside-link" data-route="home">Conheça nossa missão</a>
+            <a href="#home" class="volunteer-aside__link" data-route="home">Conheça nossa missão</a>
           </div>
         </aside>
       </article>
     </section>
   </section>
+  </main>
+
+  <main class="news-page page__view page__view--hidden page" data-view="noticias" aria-hidden="true" inert>
+    <div class="news-page__banner">
+      <div class="news-page__container">
+        <h1>NOTÍCIAS</h1>
+        <nav class="news-breadcrumb" aria-label="Breadcrumb">
+          <a href="#home" data-route="home">Início</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Notícias</span>
+        </nav>
+      </div>
+    </div>
+    <section class="news-page__container news-listing" aria-labelledby="news-list-title">
+      <div class="news-listing__heading">
+        <div>
+          <span class="news-section__tag">UCA</span>
+          <h2 id="news-list-title">Últimas Notícias</h2>
+        </div>
+        <p>Acompanhe as histórias e novidades da nossa comunidade.</p>
+      </div>
+      <form class="news-filters" id="newsFilters" role="search" aria-label="Filtrar notícias">
+        <div class="news-filters__field">
+          <label for="newsYearFilter">Ano</label>
+          <select id="newsYearFilter" name="year"><option value="">Todos os anos</option></select>
+        </div>
+        <div class="news-filters__field">
+          <label for="newsCategoryFilter">Categoria</label>
+          <select id="newsCategoryFilter" name="category"><option value="">Todas as categorias</option></select>
+        </div>
+        <div class="news-filters__field news-filters__field--search">
+          <label for="newsSearch">Pesquisar</label>
+          <input id="newsSearch" name="q" type="search" placeholder="Busque por palavra-chave" autocomplete="off">
+        </div>
+      </form>
+      <p class="news-listing__status" id="newsListingStatus" role="status" aria-live="polite">Carregando notícias...</p>
+      <div class="news-card-grid" id="newsListingGrid" aria-live="polite" aria-busy="true"></div>
+    </section>
+  </main>
+
+  <main class="news-page news-page--article page__view page__view--hidden page" data-view="noticia" aria-hidden="true" inert>
+    <div class="news-page__banner">
+      <div class="news-page__container">
+        <h1>NOTÍCIAS</h1>
+        <nav class="news-breadcrumb" aria-label="Breadcrumb">
+          <a href="#home" data-route="home">Início</a>
+          <span aria-hidden="true">/</span>
+          <a href="#noticias">Notícias</a>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page" id="newsArticleBreadcrumb">Matéria</span>
+        </nav>
+      </div>
+    </div>
+    <section class="news-page__container news-article-layout" id="newsArticleContent" aria-live="polite" aria-busy="true">
+      <p class="news-article__status" role="status">Carregando notícia...</p>
+    </section>
+  </main>
+
+  <main class="page-athlete-profile page__view page__view--hidden page" data-view="perfil" aria-hidden="true">
+    <div class="athlete-profile__card" aria-label="Ranking de atletas">
+      <form class="athlete-profile__form" role="search" aria-label="Pesquisa de atletas">
+        <div class="athlete-profile__panel" data-panel="filters">
+          <fieldset class="athlete-profile__filters">
+            <legend>RANKING</legend>
+            <div class="athlete-profile__filter-grid">
+              <div class="athlete-profile__field">
+                <label for="athlete-year">ANO</label>
+                <select id="athlete-year" name="year">
+                  <option value="" selected>Todos</option>
+                </select>
+              </div>
+              <div class="athlete-profile__field">
+                <label for="athlete-discipline">PROVA</label>
+                <select id="athlete-discipline" name="event">
+                  <option value="" selected>Todos</option>
+                </select>
+              </div>
+              <div class="athlete-profile__field">
+                <label for="athlete-gender">GÊNERO</label>
+                <select id="athlete-gender" name="gender">
+                  <option value="" selected>Todos</option>
+                </select>
+              </div>
+              <div class="athlete-profile__field">
+                <label for="athlete-category">CATEGORIA</label>
+                <select id="athlete-category" name="category">
+                  <option value="" selected>Todos</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+          <div class="athlete-profile__mark-mode" role="group" aria-label="Exibição das marcas">
+            <button class="button--secondary button" type="button" data-mark-mode="best" aria-pressed="true">MELHOR MARCA</button>
+            <button class="button--secondary button" type="button" data-mark-mode="all" aria-pressed="false">TODAS AS MARCAS</button>
+          </div>
+          <p class="athlete-profile__hint">Selecione os campos acima para visualizar os ranckings desejado.</p>
+        </div>
+      </form>
+
+      <section class="athlete-profile__results athlete-profile__panel" data-panel="ranking" aria-labelledby="athlete-results-title">
+        <h2 id="athlete-results-title">RESULTADOS</h2>
+        <p class="athlete-profile__status" id="athlete-results-status" role="status" aria-live="polite">Carregando registros...</p>
+        <div class="athlete-profile__results-content" id="athlete-results-content" aria-busy="true"></div>
+      </section>
+
+      <section class="athlete-profile__results athlete-profile__panel athlete-profile__panel--hidden" data-panel="complement" aria-label="Complemento" hidden>
+        <p class="athlete-profile__status" id="athlete-complement-status" role="status" aria-live="polite">Carregando informações complementares...</p>
+        <div class="athlete-profile__results-content" id="athlete-complement-content" aria-busy="true"></div>
+      </section>
+
+      <section class="athlete-profile__history athlete-profile__panel athlete-profile__panel--hidden" data-panel="history" aria-labelledby="athlete-history-title" hidden>
+        <h2 id="athlete-history-title">HISTÓRICO</h2>
+        <div class="athlete-profile__history-toolbar">
+          <div class="athlete-profile__history-search">
+            <label for="history-athlete-search">Procure um atleta</label>
+            <div class="athlete-profile__combobox">
+              <input id="history-athlete-search" name="history-athlete" type="search" placeholder="Digite o nome do atleta" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="history-athlete-options" aria-haspopup="listbox">
+              <button class="athlete-profile__combobox-toggle" type="button" aria-label="Mostrar nomes de atletas do histórico" aria-controls="history-athlete-options" aria-expanded="false">&#9662;</button>
+              <ul class="athlete-profile__athlete-options" id="history-athlete-options" role="listbox" hidden></ul>
+            </div>
+          </div>
+          <button class="button--secondary button" type="button" id="history-download-pdf">BAIXAR PDF</button>
+        </div>
+        <div class="athlete-profile__mark-mode" role="group" aria-label="Exibição do histórico">
+          <button class="button--secondary button" type="button" data-history-mark-mode="best" aria-pressed="true">MELHOR MARCA</button>
+          <button class="button--secondary button" type="button" data-history-mark-mode="all" aria-pressed="false">TODAS MARCAS</button>
+        </div>
+        <p class="athlete-profile__status" id="athlete-history-status" role="status" aria-live="polite">Selecione um atleta para visualizar o histórico.</p>
+        <div class="athlete-profile__results-content" id="athlete-history-content" aria-busy="false"></div>
+      </section>
+    </div>
+  </main>
 
   <footer class="site-footer">
     <p>ONG Transformar — Educação, inclusão e solidariedade.</p>

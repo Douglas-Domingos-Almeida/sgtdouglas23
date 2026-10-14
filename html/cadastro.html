@@ -8,74 +8,95 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="brand-link" href="index.html" aria-label="ONG Transformar">
-      <img src="../imagens/logo-ong-transformar.jpg" alt="ONG Transformar" class="logo">
+    <a class="site-header__brand" href="index.html" aria-label="ONG Transformar">
+      <span class="site-header__brand-tagline">ORGULHO DE SER!</span>
+      <img src="../imagens/Simbolo%20da%20UCA%20(1).png" alt="Símbolo da UCA" class="logo">
     </a>
 
-    <nav class="main-nav" aria-label="Navegação principal">
-      <a href="index.html" class="nav-link">Página Principal</a>
-      <a href="#cadastro" class="nav-link active">Cadastro</a>
+    <nav class="site-header__navigation" aria-label="Navegação principal">
+      <a href="index.html" class="site-header__link">Página Principal</a>
+      <a href="#cadastro" class="site-header__link site-header__link--active">Cadastro</a>
     </nav>
 
-    <a class="header-button" href="index.html">Voltar ao início</a>
+    <button class="site-header__search-toggle" type="button" aria-label="Pesquisar" aria-expanded="false" aria-controls="site-search">
+      <svg class="site-header__search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+        <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/>
+        <path d="M15.5 15.5 21 21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <a class="button--header button" href="index.html">Voltar ao início</a>
+    <form class="site-search" id="site-search" role="search" aria-label="Pesquisar no site" hidden>
+      <input class="site-search__input" id="site-search-input" name="q" type="search" placeholder="Pesquisar no site..." aria-label="Pesquisar no site" autocomplete="off">
+      <button class="site-search__submit" type="submit" aria-label="Buscar">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5 21 21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="site-search__close" type="button" aria-label="Fechar pesquisa">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <p class="site-search__status" role="status" hidden></p>
+    </form>
   </header>
 
   <main class="page-cadastro">
     <section class="registration-card" aria-labelledby="page-title">
-      <section class="registration-hero">
-        <figure class="registration-brand">
-          <img src="../imagens/logo-ong-transformar.jpg" alt="ONG Transformar" class="logo">
+      <section class="registration-card__hero">
+        <figure class="registration-card__brand">
+          <img src="../imagens/Simbolo%20da%20UCA%20(1).png" alt="Símbolo da UCA" class="logo">
         </figure>
 
-        <span class="registration-divider" aria-hidden="true"></span>
+        <span class="registration-card__divider" aria-hidden="true"></span>
 
-        <section class="registration-content">
-          <span class="section-kicker">Seja parte do projeto</span>
+        <section class="registration-card__content">
+          <span class="section-heading__kicker">Seja parte do projeto</span>
           <h1 id="page-title">Cadastro de <span>Voluntário</span></h1>
           <p>Preencha seus dados e faça parte dessa transformação!</p>
         </section>
       </section>
 
-      <article class="form-wrapper">
-        <section class="form-panel">
+      <article class="registration-card__form-wrapper">
+        <section class="registration-card__form-panel">
           <form class="volunteer-form">
-            <fieldset class="form-fieldset">
+            <fieldset class="volunteer-form__fieldset">
               <legend>Dados pessoais</legend>
 
-              <div class="field-group">
+              <div class="volunteer-form__field">
                 <label for="nome">Nome completo <span>*</span></label>
-                <div class="input-with-icon">
-                  <div class="icon-box" aria-hidden="true">👤</div>
-                  <input id="nome" name="nome" type="text" placeholder="Digite seu nome completo" required pattern="^[A-Za-zÀ-ÿ]+(?:\s[A-Za-zÀ-ÿ]+)+$" title="Informe o nome completo com pelo menos duas partes." minlength="3">
+                <div class="volunteer-form__input-wrap">
+                  <div class="volunteer-form__icon" aria-hidden="true">👤</div>
+                  <input id="nome" name="nome" type="text" placeholder="Digite seu nome completo" required pattern="^[A-Za-zÀ-ÿ]+(?:\s[A-Za-zÀ-ÿ]+)+$" aria-describedby="nome-ajuda" title="Informe o nome completo com pelo menos duas partes." minlength="3">
                 </div>
+                <small class="volunteer-form__hint" id="nome-ajuda">Informe o nome completo com pelo menos duas partes.</small>
               </div>
 
-              <div class="form-row">
-                <div class="field-group">
+              <div class="volunteer-form__row">
+                <div class="volunteer-form__field">
                   <label for="email">E-mail <span>*</span></label>
-                  <div class="input-with-icon">
-                    <div class="icon-box" aria-hidden="true">✉</div>
-                    <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" required pattern="^[^\s@]+@[^\s@]+\.[^\s@]{2,}$" title="Informe um e-mail válido no formato nome@dominio.com">
+                  <div class="volunteer-form__input-wrap">
+                    <div class="volunteer-form__icon" aria-hidden="true">✉</div>
+                    <input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" required pattern="^[^\s@]+@[^\s@]+\.[^\s@]{2,}$" aria-describedby="email-ajuda" title="Informe um e-mail válido no formato nome@dominio.com">
                   </div>
+                  <small class="volunteer-form__hint" id="email-ajuda">Formato esperado: nome@dominio.com.</small>
                 </div>
 
-                <div class="field-group">
+                <div class="volunteer-form__field">
                   <label for="telefone">Telefone <span>*</span></label>
-                  <div class="input-with-icon">
-                    <div class="icon-box" aria-hidden="true">☎</div>
-                    <input id="telefone" name="telefone" type="tel" placeholder="(00) 00000-0000" required pattern="^\(\d{2}\)\s?\d{4,5}-\d{4}$" title="Informe o telefone no formato (00) 00000-0000">
+                  <div class="volunteer-form__input-wrap">
+                    <div class="volunteer-form__icon" aria-hidden="true">☎</div>
+                    <input id="telefone" name="telefone" type="tel" placeholder="(00) 00000-0000" required pattern="^\(\d{2}\)\s?\d{4,5}-\d{4}$" aria-describedby="telefone-ajuda" title="Informe o telefone no formato (00) 00000-0000">
                   </div>
+                  <small class="volunteer-form__hint" id="telefone-ajuda">Formato esperado: (00) 00000-0000.</small>
                 </div>
               </div>
             </fieldset>
 
-            <fieldset class="form-fieldset">
+            <fieldset class="volunteer-form__fieldset">
               <legend>Disponibilidade e interesse</legend>
 
-              <div class="field-group">
+              <div class="volunteer-form__field">
                 <label for="disponibilidade">Disponibilidade <span>*</span></label>
-                <div class="input-with-icon select-wrapper">
-                  <div class="icon-box" aria-hidden="true">☼</div>
+                <div class="volunteer-form__input-wrap volunteer-form__input-wrap--select">
+                  <div class="volunteer-form__icon" aria-hidden="true">☼</div>
                   <select id="disponibilidade" name="disponibilidade" required>
                     <option value="" selected disabled>Selecione sua disponibilidade</option>
                     <option>Durante a semana</option>
@@ -84,14 +105,14 @@
                     <option>Tarde</option>
                     <option>Noite</option>
                   </select>
-                  <span class="chevron"></span>
+                  <span class="volunteer-form__chevron"></span>
                 </div>
               </div>
 
-              <div class="field-group">
+              <div class="volunteer-form__field">
                 <label for="areas">Áreas de interesse <span>*</span></label>
-                <div class="input-with-icon select-wrapper">
-                  <div class="icon-box" aria-hidden="true">✦</div>
+                <div class="volunteer-form__input-wrap volunteer-form__input-wrap--select">
+                  <div class="volunteer-form__icon" aria-hidden="true">✦</div>
                   <select id="areas" name="areas" required>
                     <option value="" selected disabled>Selecione uma ou mais áreas</option>
                     <option>Educação</option>
@@ -100,47 +121,48 @@
                     <option>Comunicação</option>
                     <option>Administrativo</option>
                   </select>
-                  <span class="chevron"></span>
+                  <span class="volunteer-form__chevron"></span>
                 </div>
               </div>
 
-              <div class="field-group">
+              <div class="volunteer-form__field">
                 <label for="mensagem">Mensagem (opcional)</label>
-                <div class="input-with-icon textarea-wrapper">
-                  <div class="icon-box" aria-hidden="true">✎</div>
-                  <textarea id="mensagem" name="mensagem" placeholder="Conte um pouco sobre você e sua motivação para ser um voluntário..."></textarea>
+                <div class="volunteer-form__input-wrap volunteer-form__input-wrap--textarea">
+                  <div class="volunteer-form__icon" aria-hidden="true">✎</div>
+                  <textarea id="mensagem" name="mensagem" aria-describedby="mensagem-ajuda"></textarea>
                 </div>
+                <small class="volunteer-form__hint" id="mensagem-ajuda">Conte um pouco sobre você e sua motivação para ser voluntário.</small>
               </div>
             </fieldset>
 
-            <button type="submit" class="submit-button">
-              <span class="send-icon">➤</span>
+            <button type="submit" class="volunteer-form__submit" aria-label="Enviar Cadastro de Voluntário">
+              <span class="volunteer-form__send-icon">➤</span>
               <span>Enviar Cadastro</span>
             </button>
 
-            <p class="security-note">
-              <span class="lock-icon">🔒</span>
+            <p class="volunteer-form__security-note">
+              <span class="volunteer-form__lock-icon">🔒</span>
               <span>Seus dados estão seguros. Utilizamos suas informações apenas para fins institucionais.</span>
             </p>
           </form>
 
           <section class="feedback-showcase" aria-labelledby="feedback-title">
-            <div class="feedback-heading">
-              <span class="section-kicker">Retorno imediato</span>
+            <div class="feedback-showcase__heading">
+              <span class="section-heading__kicker">Retorno imediato</span>
               <h2 id="feedback-title">Microinterações de atendimento</h2>
               <p>Mensagens curtas orientam o próximo passo sem interromper a tarefa.</p>
             </div>
 
-            <div class="feedback-alerts">
-              <div class="feedback-alert feedback-alert-success" role="status">
-                <span class="feedback-alert-icon" aria-hidden="true">✓</span>
+            <div class="feedback-showcase__alerts">
+              <div class="feedback-alert feedback-alert--success" role="status">
+                <span class="feedback-alert__icon" aria-hidden="true">✓</span>
                 <div>
                   <strong>Cadastro pronto para envio</strong>
                   <span>Todos os campos obrigatórios foram preenchidos.</span>
                 </div>
               </div>
-              <div class="feedback-alert feedback-alert-warning" role="alert">
-                <span class="feedback-alert-icon" aria-hidden="true">!</span>
+              <div class="feedback-alert feedback-alert--warning" role="alert">
+                <span class="feedback-alert__icon" aria-hidden="true">!</span>
                 <div>
                   <strong>Confira seus dados</strong>
                   <span>Revise os campos destacados antes de continuar.</span>
@@ -148,102 +170,102 @@
               </div>
             </div>
 
-            <div class="feedback-demo-row">
-              <span class="feedback-label">Etiquetas ativas</span>
-              <div class="feedback-badges" aria-label="Categorias de projetos">
-                <span class="feedback-badge feedback-badge-green">Educação</span>
-                <span class="feedback-badge feedback-badge-blue">Inclusão</span>
-                <span class="feedback-badge feedback-badge-orange">Prioridade</span>
+            <div class="feedback-showcase__demo-row">
+              <span class="feedback-showcase__label">Etiquetas ativas</span>
+              <div class="feedback-showcase__badges" aria-label="Categorias de projetos">
+                <span class="feedback-badge feedback-badge--green">Educação</span>
+                <span class="feedback-badge feedback-badge--blue">Inclusão</span>
+                <span class="feedback-badge feedback-badge--orange">Prioridade</span>
               </div>
-              <button class="feedback-toast-trigger" type="button">Mostrar toast</button>
+              <button class="feedback-showcase__toast-trigger" type="button" aria-label="Mostrar toast de confirmação">Mostrar toast</button>
             </div>
           </section>
         </section>
 
         <aside class="volunteer-aside">
-          <div class="volunteer-aside-card">
-            <span class="volunteer-aside-tag">Programa Voluntariado</span>
-            <h3 class="volunteer-aside-title">Transformar com ação</h3>
+          <div class="volunteer-aside__card">
+            <span class="volunteer-aside__tag">Programa Voluntariado</span>
+            <h2 class="volunteer-aside__title">Transformar com ação</h2>
 
-            <div class="volunteer-aside-image">
+            <div class="volunteer-aside__image">
               <img src="assets/img/institucional-ong.jpg" alt="Trabalho voluntário em educação e inclusão">
-              <span class="volunteer-aside-image-caption">Educação • Inclusão • Comunidade</span>
-              <span class="volunteer-aside-year">Ação Social 2026</span>
+              <span class="volunteer-aside__image-caption">Educação • Inclusão • Comunidade</span>
+              <span class="volunteer-aside__year">Ação Social 2026</span>
             </div>
 
-            <div class="volunteer-aside-line"></div>
+            <div class="volunteer-aside__line"></div>
 
-            <div class="volunteer-aside-stats">
+            <div class="volunteer-aside__stats">
               <div class="volunteer-stat">
-                <span class="volunteer-stat-number">12+</span>
-                <span class="volunteer-stat-label">ações por mês</span>
+                <span class="volunteer-stat__number">12+</span>
+                <span class="volunteer-stat__label">ações por mês</span>
               </div>
               <div class="volunteer-stat">
-                <span class="volunteer-stat-number">350</span>
-                <span class="volunteer-stat-label">voluntários ativos</span>
+                <span class="volunteer-stat__number">350</span>
+                <span class="volunteer-stat__label">voluntários ativos</span>
               </div>
               <div class="volunteer-stat">
-                <span class="volunteer-stat-number">04</span>
-                <span class="volunteer-stat-label">frentes de apoio</span>
+                <span class="volunteer-stat__number">04</span>
+                <span class="volunteer-stat__label">frentes de apoio</span>
               </div>
             </div>
 
-            <div class="timeline-panel">
-              <div class="timeline-title">Campanhas sociais</div>
-              <div class="timeline-list">
-                <div class="timeline-item">
-                  <span class="timeline-point"></span>
-                  <span class="timeline-label">Jan</span>
-                  <span class="timeline-text">Escolas em ação</span>
+            <div class="campaign-timeline">
+              <div class="campaign-timeline__title">Campanhas sociais</div>
+              <div class="campaign-timeline__list">
+                <div class="campaign-timeline__item">
+                  <span class="campaign-timeline__point"></span>
+                  <span class="campaign-timeline__label">Jan</span>
+                  <span class="campaign-timeline__text">Escolas em ação</span>
                 </div>
-                <div class="timeline-item">
-                  <span class="timeline-point"></span>
-                  <span class="timeline-label">Mar</span>
-                  <span class="timeline-text">Alimenta a esperança</span>
+                <div class="campaign-timeline__item">
+                  <span class="campaign-timeline__point"></span>
+                  <span class="campaign-timeline__label">Mar</span>
+                  <span class="campaign-timeline__text">Alimenta a esperança</span>
                 </div>
-                <div class="timeline-item">
-                  <span class="timeline-point"></span>
-                  <span class="timeline-label">Ago</span>
-                  <span class="timeline-text">Semana da inclusão</span>
+                <div class="campaign-timeline__item">
+                  <span class="campaign-timeline__point"></span>
+                  <span class="campaign-timeline__label">Ago</span>
+                  <span class="campaign-timeline__text">Semana da inclusão</span>
                 </div>
               </div>
             </div>
 
             <div class="impact-map">
-              <div class="impact-map-head">
-                <span class="impact-map-title">Território de atuação</span>
-                <span class="impact-map-icon">✧</span>
+              <div class="impact-map__head">
+                <span class="impact-map__title">Território de atuação</span>
+                <span class="impact-map__icon">✧</span>
               </div>
-              <div class="impact-map-grid">
-                <span class="impact-city city-sp">SP</span>
-                <span class="impact-city city-rj">RJ</span>
-                <span class="impact-city city-ba">BA</span>
-                <span class="impact-city city-pe">PE</span>
+              <div class="impact-map__grid">
+                <span class="impact-map__city impact-map__city--sp">SP</span>
+                <span class="impact-map__city impact-map__city--rj">RJ</span>
+                <span class="impact-map__city impact-map__city--ba">BA</span>
+                <span class="impact-map__city impact-map__city--pe">PE</span>
               </div>
             </div>
 
             <div class="campaign-status">
-              <div class="campaign-status-head">
-                <span class="campaign-status-title">Campanhas ativas</span>
-                <span class="campaign-status-number">08/10</span>
+              <div class="campaign-status__head">
+                <span class="campaign-status__title">Campanhas ativas</span>
+                <span class="campaign-status__number">08/10</span>
               </div>
-              <div class="campaign-status-track">
-                <span class="campaign-status-bar"></span>
+              <div class="campaign-status__track">
+                <span class="campaign-status__bar"></span>
               </div>
-              <div class="campaign-status-meta">
-                <span class="campaign-status-label">Nutrição</span>
-                <span class="campaign-status-label">Educação</span>
-                <span class="campaign-status-label">Inclusão</span>
+              <div class="campaign-status__meta">
+                <span class="campaign-status__label">Nutrição</span>
+                <span class="campaign-status__label">Educação</span>
+                <span class="campaign-status__label">Inclusão</span>
               </div>
             </div>
 
-            <div class="volunteer-aside-list">
-              <div class="volunteer-aside-row"><span class="row-icon">✦</span><span>Educação e inclusão</span></div>
-              <div class="volunteer-aside-row"><span class="row-icon">✦</span><span>Eventos comunitários</span></div>
-              <div class="volunteer-aside-row"><span class="row-icon">✦</span><span>Atendimento social</span></div>
+            <div class="volunteer-aside__list">
+              <div class="volunteer-aside__row"><span class="volunteer-aside__row-icon">✦</span><span>Educação e inclusão</span></div>
+              <div class="volunteer-aside__row"><span class="volunteer-aside__row-icon">✦</span><span>Eventos comunitários</span></div>
+              <div class="volunteer-aside__row"><span class="volunteer-aside__row-icon">✦</span><span>Atendimento social</span></div>
             </div>
 
-            <a href="index.html" class="volunteer-aside-link">Conheça nossa missão</a>
+            <a href="index.html" class="volunteer-aside__link">Conheça nossa missão</a>
           </div>
         </aside>
       </article>
@@ -255,9 +277,9 @@
   </footer>
 
   <div class="feedback-toast" role="status" aria-live="polite" aria-hidden="true">
-    <span class="feedback-toast-icon" aria-hidden="true">✓</span>
+    <span class="feedback-toast__icon" aria-hidden="true">✓</span>
     <span><strong>Preferência salva</strong><small>Seu interesse foi registrado.</small></span>
-    <button class="feedback-toast-close" type="button" aria-label="Fechar notificação">×</button>
+    <button class="feedback-toast__close" type="button" aria-label="Fechar notificação">×</button>
   </div>
 
   <script src="../js/main.js"></script>
