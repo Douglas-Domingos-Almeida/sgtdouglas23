@@ -1,6 +1,9 @@
 (() => {
   const newsFiles = Array.from({ length: 8 }, (_, index) => `Noticia(${index + 1}).md`);
   const newsDirectory = '/conteudo/noticias/';
+  // A raiz do site é deduzida da posição deste script, para funcionar também em file:/// e em subpastas.
+  const siteRoot = document.currentScript?.src ? new URL('../', document.currentScript.src) : new URL('./', window.location.href);
+  const resolveAsset = (path) => new URL(String(path).replace(/^\/+/, ''), siteRoot).href;
   const pendingValue = 'PENDENTE_CONFIRMAR';
   const previewCovers = {
     'noticia-001': {
@@ -96,6 +99,10 @@
   }
 
   async function loadArticle(fileName) {
+    // news-data.js embute as matérias para que o site funcione ao abrir o index.html direto (file:///).
+    const embedded = window.NEWS_SOURCES?.[fileName];
+    if (typeof embedded === 'string') return parseMetadata(embedded, fileName);
+
     const response = await fetch(`${newsDirectory}${encodeURIComponent(fileName)}`, {
       headers: { Accept: 'text/markdown, text/plain' }
     });
@@ -139,15 +146,16 @@
       && item.content;
   }
 
-  async function hasAvailableCover(item) {
-    const url = new URL(item.coverImage, window.location.href);
-    if (url.origin !== window.location.origin) return false;
+  function hasAvailableCover(item) {
+    const url = new URL(resolveAsset(item.coverImage));
+    if (url.origin !== siteRoot.origin) return Promise.resolve(false);
 
-    const response = await fetch(url.href, {
-      method: 'HEAD',
-      credentials: 'same-origin'
+    return new Promise((resolve) => {
+      const probe = new Image();
+      probe.onload = () => resolve(true);
+      probe.onerror = () => resolve(false);
+      probe.src = url.href;
     });
-    return response.ok;
   }
 
   function sortByPublicationDate(items) {
@@ -187,7 +195,7 @@
         const link = value.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
         let safeUrl;
         try {
-          const parsedUrl = new URL(link[2], window.location.origin);
+          const parsedUrl = new URL(link[2], window.location.href);
           if (['http:', 'https:', 'mailto:'].includes(parsedUrl.protocol)) safeUrl = link[2];
         } catch {
           safeUrl = null;
@@ -319,7 +327,7 @@
     if (!preview || previewCover) {
       const image = document.createElement('img');
       image.className = 'news-story-card__image';
-      image.src = previewCover ? previewCover.src : item.coverImage;
+      image.src = resolveAsset(previewCover ? previewCover.src : item.coverImage);
       image.alt = previewCover ? previewCover.alt : item.imageAlt;
       image.loading = preview ? 'eager' : 'lazy';
       image.addEventListener('error', () => {
@@ -558,7 +566,7 @@
     const figure = document.createElement('figure');
     figure.className = 'news-article__figure';
     const image = document.createElement('img');
-    image.src = item.coverImage;
+    image.src = resolveAsset(item.coverImage);
     image.alt = item.imageAlt;
     image.addEventListener('error', () => {
       image.hidden = true;
