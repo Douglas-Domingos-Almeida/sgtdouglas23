@@ -1,17 +1,17 @@
-# Design System – ONG Transformar
+# Design System da UCA Master
 
 ## 1. Visão geral
 
-O Design System da ONG Transformar foi estruturado para garantir consistência visual, manutenção simplificada e reutilização entre telas. Ele centraliza as decisões de design em variáveis CSS, facilitando ajustes em toda a interface sem perder coerência estética.
+O Design System da UCA Master foi estruturado para garantir consistência visual, manutenção simplificada e reutilização entre telas. Ele centraliza as decisões de design em variáveis CSS, facilitando ajustes em toda a interface sem perder coerência estética.
 
-A identidade visual prioriza confiança, acolhimento, educação e solidariedade, com uma linguagem moderna, clara e acessível.
+A identidade visual celebra a paixão pelo atletismo Master, a união entre atletas e a superação, com uma linguagem moderna, clara e acessível.
 
 ## 2. Princípios do sistema
 
 - Consistência visual em todas as páginas
 - Reuso de componentes e estilos
 - Legibilidade e acessibilidade
-- Tom institucional voltado à educação e ao impacto social
+- Tom esportivo que celebra o atletismo Master, a união e a superação
 - Flexibilidade para adaptação em diferentes dispositivos
 
 ## 3. Paleta cromática
@@ -192,4 +192,4 @@ A implementação atual já segue o conceito deste Design System, com as variáv
 
 ## 10. Conclusão
 
-O Design System da ONG Transformar foi pensado para transmitir segurança, acolhimento e propósito social por meio de uma linguagem visual coesa. Sua abordagem em tokens CSS garante escala, padronização e eficiência de manutenção ao longo do projeto.
+O Design System da UCA Master foi pensado para transmitir energia, união e paixão pelo atletismo por meio de uma linguagem visual coesa. Sua abordagem em tokens CSS garante escala, padronização e eficiência de manutenção ao longo do projeto.

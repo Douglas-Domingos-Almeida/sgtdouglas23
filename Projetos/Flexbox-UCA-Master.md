@@ -1,4 +1,4 @@
-# Registro de módulos Flexbox – ONG Transformar
+# Registro de módulos Flexbox – UCA Master
 
 Este documento registra os principais contentores em que a abordagem Flexbox foi decisiva para o alinhamento, espaçamento e organização interna dos elementos da interface.
 
@@ -60,7 +60,7 @@ Este documento registra os principais contentores em que a abordagem Flexbox foi
 **Função:** mantém o CTA e ações complementares alinhados e responsivos.
 
 ## 6. `hero-stats`
-**Objetivo:** dispor indicadores de impacto social ou métricas visuais.
+**Objetivo:** dispor indicadores visuais ligados à paixão pelo atletismo Master.
 
 **Propriedades aplicadas:**
 - `display: flex;`
@@ -72,7 +72,7 @@ Este documento registra os principais contentores em que a abordagem Flexbox foi
 **Função:** permite que os cartões de estatística preencham o espaço de forma uniforme, sem quebrar o layout em telas menores.
 
 ## 7. `intro-feature-list`
-**Objetivo:** alinhar os destaques de missão/valores da ONG.
+**Objetivo:** alinhar os destaques de missão e valores da UCA Master.
 
 **Propriedades aplicadas:**
 - `display: flex;`
@@ -126,7 +126,7 @@ Este documento registra os principais contentores em que a abordagem Flexbox foi
 **Função:** apesar do uso do Grid, a composição interna também se apoia em alinhamentos horizontais e verticais para manter textos e cartão secundário em equilíbrio.
 
 ## 12. `floating-card`
-**Objetivo:** destacar um indicador de voluntariado no bloco de cadastro.
+**Objetivo:** destacar um valor esportivo da UCA no bloco de cadastro.
 
 **Propriedades aplicadas:**
 - `display: flex;`

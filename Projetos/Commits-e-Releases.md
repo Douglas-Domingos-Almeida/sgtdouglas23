@@ -2,7 +2,7 @@
 
 | Mensagem de commit ou tag da release | Descrição e justificativa da alteração |
 | --- | --- |
-| `feat(site): cria estrutura inicial da plataforma ONG Transformar` | Registra a entrega inicial do site, incluindo a estrutura das páginas, estilos e scripts. O tipo `feat` indica a inclusão de uma funcionalidade relevante e facilita a leitura do histórico. |
+| `feat(site): cria estrutura inicial do site UCA Master` | Registra a entrega inicial do site da UCA Master, incluindo a estrutura das páginas, estilos e scripts. O tipo `feat` indica a inclusão de uma funcionalidade relevante e facilita a leitura do histórico. |
 | `v1.0.0` | Primeira versão estável do projeto. O número maior indica a versão inicial da aplicação, o zero menor representa a primeira entrega e o último zero indica que não houve correções posteriores nessa série. A tag permite identificar exatamente o estado do código entregue. |
 
 ## Estratégia de versionamento
