@@ -7,44 +7,39 @@
   const pendingValue = 'PENDENTE_CONFIRMAR';
   const previewCovers = {
     'noticia-001': {
-      src: '/imagens/noticias/imagem(2).jpg',
-      alt: 'Grupo de atletas reunido e comemorando na pista',
-      note: 'Foto de equipe do campeonato; identidades não confirmadas.'
+      src: '/imagens/noticias/imagem(1).jpg',
+      alt: 'Equipe reunida e comemorando na pista',
+      note: 'Foto de equipe; atletas não identificados individualmente.'
     },
     'noticia-002': {
-      src: '/imagens/noticias/imagem(3).jpg',
-      alt: 'Atletas disputando uma prova de pista com barreiras ao fundo',
-      note: 'Foto ilustrativa da competição; atleta não confirmado.'
+      src: '/imagens/noticias/imagem(2).jpg',
+      alt: 'Atletas disputam prova de pista com barreiras',
+      note: 'Foto da prova; atletas não identificados individualmente.'
     },
     'noticia-003': {
-      src: '/imagens/noticias/imagem(5).jpg',
-      alt: 'Atleta exibindo duas medalhas douradas na pista',
-      note: 'Foto ilustrativa; identidade da atleta não confirmada.'
+      src: '/imagens/noticias/imagem(3).jpg',
+      alt: 'Atleta exibe duas medalhas douradas na pista',
+      note: 'Foto de atleta medalhista; identidade não confirmada.'
     },
     'noticia-004': {
-      src: '/imagens/noticias/imagem(1).jpg',
-      alt: 'Atletas disputando uma corrida na pista',
-      note: 'Foto ilustrativa da competição; atleta não confirmado.'
+      src: '/imagens/noticias/imagem(4).jpg',
+      alt: 'Atleta de camisa verde corre na pista',
+      note: 'Foto de corrida; atleta não identificado individualmente.'
     },
     'noticia-005': {
-      src: '/imagens/noticias/imagem(1).jpg',
-      alt: 'Atletas disputando uma corrida na pista',
-      note: 'Foto ilustrativa do campeonato; atleta da marcha não identificado.'
+      src: '/imagens/noticias/imagem(5).jpg',
+      alt: 'Atleta de camisa preta corre na pista',
+      note: 'Foto ilustrativa de atletismo; não representa necessariamente a prova da matéria.'
     },
     'noticia-006': {
-      src: '/imagens/noticias/imagem(4).jpg',
-      alt: 'Atleta executando um salto em altura',
-      note: 'Foto de salto em altura; atleta não confirmado.'
+      src: '/imagens/noticias/imagem(6).jpg',
+      alt: 'Atleta executa um salto em altura',
+      note: 'Foto da prova; atleta não identificado individualmente.'
     },
     'noticia-007': {
       src: '/imagens/noticias/imagem(7).jpg',
-      alt: 'Atleta executando um salto em altura',
-      note: 'Foto de salto em altura; atleta não confirmado.'
-    },
-    'noticia-008': {
-      src: '/imagens/noticias/imagem(8).jpg',
-      alt: 'Atleta ao lado do placar que mostra 74,58 m',
-      note: 'Imagem associada à matéria pelo placar de 74,58 m e pela legenda original.'
+      alt: 'Atleta executa um salto em altura',
+      note: 'Foto da prova; atleta não identificado individualmente.'
     }
   };
   const homeGrid = document.getElementById('homeNewsGrid');
@@ -169,8 +164,8 @@
     });
   }
 
-  function makeSlugHref(slug) {
-    return `#noticia/${encodeURIComponent(slug)}`;
+  function makeSlugHref(slug, id) {
+    return `#noticia/${encodeURIComponent(slug)}?id=${encodeURIComponent(id)}`;
   }
 
   function appendInlineText(parent, text) {
@@ -314,21 +309,23 @@
     const article = document.createElement('article');
     article.className = 'news-story-card';
 
-    const cardContent = document.createElement(preview ? 'div' : 'a');
+    const cardContent = document.createElement('a');
     cardContent.className = 'news-story-card__link';
     if (preview) {
       cardContent.classList.add('news-story-card__link--preview');
-    } else {
-      cardContent.href = makeSlugHref(item.slug);
-      cardContent.setAttribute('aria-label', `Ler notícia: ${item.title}`);
     }
+    cardContent.href = makeSlugHref(item.slug, item.id);
+    cardContent.setAttribute('aria-label', `Ler notícia: ${item.title}`);
 
-    const previewCover = preview ? previewCovers[item.id] : null;
-    if (!preview || previewCover) {
+    const previewCover = preview && item.status === 'draft' ? previewCovers[item.id] : null;
+    const coverImage = previewCover?.src || (item.coverImage && item.coverImage !== pendingValue ? item.coverImage : '');
+    if (coverImage) {
+      const media = document.createElement('div');
+      media.className = 'news-story-card__media';
       const image = document.createElement('img');
       image.className = 'news-story-card__image';
-      image.src = resolveAsset(previewCover ? previewCover.src : item.coverImage);
-      image.alt = previewCover ? previewCover.alt : item.imageAlt;
+      image.src = resolveAsset(coverImage);
+      image.alt = previewCover?.alt || (item.imageAlt && item.imageAlt !== pendingValue ? item.imageAlt : '');
       image.loading = preview ? 'eager' : 'lazy';
       image.addEventListener('error', () => {
         image.remove();
@@ -337,8 +334,9 @@
         notice.textContent = 'Imagem indisponível';
         cardContent.prepend(notice);
       }, { once: true });
-      cardContent.append(image);
-      if (preview && previewCover) {
+      media.append(image);
+      cardContent.append(media);
+      if (previewCover?.note) {
         const imageNote = document.createElement('span');
         imageNote.className = 'news-story-card__image-note';
         imageNote.textContent = previewCover.note;
@@ -347,8 +345,8 @@
     } else {
       const placeholder = document.createElement('span');
       placeholder.className = 'news-story-card__image-placeholder';
-      placeholder.textContent = 'Imagem em revisão';
-      placeholder.setAttribute('aria-label', 'Imagem ainda sem associação confirmada');
+      placeholder.textContent = 'Imagem não confirmada';
+      placeholder.setAttribute('aria-label', 'Imagem de capa ainda não confirmada para esta notícia');
       cardContent.append(placeholder);
     }
 
@@ -408,10 +406,10 @@
   function populateFilters() {
     const years = new Set();
     const categories = new Set();
-    publishedNews.forEach((item) => {
+    newsItems.forEach((item) => {
       const date = parsePublicationDate(item.publishedAt);
       if (date) years.add(String(date.getUTCFullYear()));
-      categories.add(item.category);
+      if (item.category && item.category !== pendingValue) categories.add(item.category);
     });
 
     [...years].sort((left, right) => Number(right) - Number(left)).forEach((year) => {
@@ -503,30 +501,83 @@
   function makeSidebarLink(item) {
     const link = document.createElement('a');
     link.className = 'news-article__related-link';
-    link.href = makeSlugHref(item.slug);
+    link.href = makeSlugHref(item.slug, item.id);
 
-    const date = document.createElement('span');
-    date.className = 'news-article__related-date';
-    date.textContent = item.publishedAt || '';
+    const previewCover = item.status === 'draft' ? previewCovers[item.id] : null;
+    const coverImage = previewCover?.src || (item.coverImage && item.coverImage !== pendingValue ? item.coverImage : '');
+    if (coverImage) {
+      const image = document.createElement('img');
+      image.className = 'news-article__related-image';
+      image.src = resolveAsset(coverImage);
+      image.alt = '';
+      image.loading = 'lazy';
+      link.append(image);
+    }
+
+    const details = document.createElement('span');
+    details.className = 'news-article__related-details';
+    const metadata = document.createElement('span');
+    metadata.className = 'news-article__related-meta';
+
+    if (item.publishedAt && item.publishedAt !== pendingValue) {
+      const date = document.createElement('span');
+      date.className = 'news-article__related-date';
+      date.textContent = item.publishedAt;
+      metadata.append(date);
+    }
+    if (item.category && item.category !== pendingValue) {
+      const category = document.createElement('span');
+      category.className = 'news-article__related-category';
+      category.textContent = item.category;
+      metadata.append(category);
+    }
+    if (item.status === 'draft') {
+      const status = document.createElement('span');
+      status.className = 'news-article__related-status';
+      status.textContent = 'Em revisão editorial';
+      metadata.append(status);
+    }
+    if (metadata.childElementCount) details.append(metadata);
 
     const title = document.createElement('span');
     title.className = 'news-article__related-title';
     title.textContent = item.title;
+    details.append(title);
 
-    link.append(date, title);
+    const firstParagraph = item.content
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .split(/\r?\n\s*\r?\n/)
+      .map((paragraph) => paragraph.trim())
+      .find((paragraph) => paragraph && !/^#{1,6}\s/.test(paragraph)) || '';
+    const summary = !item.excerpt || /POSTADO EM:/i.test(item.excerpt)
+      ? firstParagraph
+      : item.excerpt;
+    if (summary) {
+      const excerpt = document.createElement('span');
+      excerpt.className = 'news-article__related-excerpt';
+      excerpt.textContent = summary;
+      details.append(excerpt);
+    }
+    link.append(details);
     return link;
   }
 
   function renderArticle() {
-    const routePart = window.location.hash.slice(1).split('/').slice(1).join('/');
+    const [routePart, query = ''] = window.location.hash.slice(1).split('?');
+    const slugPart = routePart.split('/').slice(1).join('/');
     let slug;
     try {
-      slug = decodeURIComponent(routePart);
+      slug = decodeURIComponent(slugPart);
     } catch {
       slug = '';
     }
 
-    const item = publishedNews.find((news) => news.slug === slug);
+    const itemId = new URLSearchParams(query).get('id');
+    const item = (itemId
+      ? newsItems.find((news) => news.id === itemId && ['draft', 'published'].includes(news.status))
+      : null)
+      || publishedNews.find((news) => news.slug === slug)
+      || newsItems.find((news) => news.slug === slug && news.status === 'draft');
     articleContent.replaceChildren();
 
     if (!item) {
@@ -556,6 +607,14 @@
     title.textContent = item.title;
     header.append(title);
 
+    if (item.status === 'draft') {
+      const reviewStatus = document.createElement('p');
+      reviewStatus.className = 'news-article__review-status';
+      reviewStatus.setAttribute('role', 'status');
+      reviewStatus.textContent = 'Prévia em revisão editorial — esta matéria ainda não foi publicada.';
+      header.append(reviewStatus);
+    }
+
     if (item.author && item.author !== pendingValue) {
       const author = document.createElement('p');
       author.className = 'news-article__author';
@@ -565,29 +624,44 @@
 
     const figure = document.createElement('figure');
     figure.className = 'news-article__figure';
-    const image = document.createElement('img');
-    image.src = resolveAsset(item.coverImage);
-    image.alt = item.imageAlt;
-    image.addEventListener('error', () => {
-      image.hidden = true;
-      const error = document.createElement('p');
-      error.className = 'news-article__image-error';
-      error.textContent = 'Não foi possível carregar a imagem desta notícia.';
-      figure.prepend(error);
-    }, { once: true });
-    figure.append(image);
+    const previewCover = item.status === 'draft' ? previewCovers[item.id] : null;
+    const coverImage = previewCover?.src || (item.coverImage && item.coverImage !== pendingValue ? item.coverImage : '');
+    if (coverImage) {
+      const image = document.createElement('img');
+      image.src = resolveAsset(coverImage);
+      image.alt = previewCover?.alt || (item.imageAlt && item.imageAlt !== pendingValue ? item.imageAlt : '');
+      image.addEventListener('error', () => {
+        image.hidden = true;
+        const error = document.createElement('p');
+        error.className = 'news-article__image-error';
+        error.textContent = 'Não foi possível carregar a imagem desta notícia.';
+        figure.prepend(error);
+      }, { once: true });
+      figure.append(image);
+    } else {
+      const placeholder = document.createElement('p');
+      placeholder.className = 'news-story-card__image-placeholder';
+      placeholder.textContent = 'Imagem de capa não disponível.';
+      figure.append(placeholder);
+    }
 
-    if (item.imageCaption || item.imageCredit) {
+    const imageCaption = item.imageCaption !== pendingValue ? item.imageCaption : '';
+    const imageCredit = item.imageCredit !== pendingValue ? item.imageCredit : '';
+    if (imageCaption || imageCredit || previewCover?.note) {
       const caption = document.createElement('figcaption');
-      if (item.imageCaption) {
+      if (previewCover?.note) {
         const captionText = document.createElement('span');
-        captionText.textContent = item.imageCaption;
+        captionText.textContent = previewCover.note;
+        caption.append(captionText);
+      } else if (imageCaption) {
+        const captionText = document.createElement('span');
+        captionText.textContent = imageCaption;
         caption.append(captionText);
       }
-      if (item.imageCredit) {
+      if (imageCredit) {
         const credit = document.createElement('span');
         credit.className = 'news-article__credit';
-        credit.textContent = `Foto: ${item.imageCredit}`;
+        credit.textContent = `Foto: ${imageCredit}`;
         caption.append(credit);
       }
       figure.append(caption);
@@ -603,15 +677,17 @@
     sidebar.setAttribute('aria-labelledby', 'related-news-title');
     const sidebarTitle = document.createElement('h2');
     sidebarTitle.id = 'related-news-title';
-    sidebarTitle.textContent = 'Outras notícias';
+    sidebarTitle.textContent = 'VEJA MAIS NOTICIA SOBRE:';
     sidebar.append(sidebarTitle);
 
-    const related = publishedNews.filter((news) => news.id !== item.id);
+    const related = sortByPublicationDate(newsItems.filter((news) => (
+      news.id !== item.id && news.id && news.slug && news.title && news.content
+    )));
     if (related.length) {
-      related.slice(0, 5).forEach((news) => sidebar.append(makeSidebarLink(news)));
+      related.forEach((news) => sidebar.append(makeSidebarLink(news)));
     } else {
       const empty = document.createElement('p');
-      empty.textContent = 'Não há outras notícias publicadas.';
+      empty.textContent = 'Não há outras notícias disponíveis.';
       sidebar.append(empty);
     }
 
@@ -666,11 +742,21 @@
     if (window.location.hash.startsWith('#noticia/')) renderArticle();
   }
 
-  filtersForm.addEventListener('submit', (event) => event.preventDefault());
+  filtersForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    renderListing();
+  });
   filtersForm.addEventListener('input', renderListing);
   filtersForm.addEventListener('change', renderListing);
   window.addEventListener('hashchange', () => {
-    if (window.location.hash.startsWith('#noticia/')) renderArticle();
+    if (!window.location.hash.startsWith('#noticia/')) return;
+    renderArticle();
+    requestAnimationFrame(() => {
+      const heading = articleContent.querySelector('.news-article__header h1');
+      if (!heading) return;
+      heading.setAttribute('tabindex', '-1');
+      heading.focus();
+    });
   });
 
   if (articleContent) articleContent.setAttribute('aria-busy', 'true');
