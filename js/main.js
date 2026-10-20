@@ -8,6 +8,7 @@ const juntosPodemosVideoUrls = {
   masterPta2022: new URL('../Videos/100m masculino cat 35 anos Master Pta 2022.mp4', mainScriptUrl).href
 };
 const athleteRankingApi = 'https://atletismomasters.com.br/wp-json/atletismo-rankings/v1/';
+const testimonialsApi = 'http://127.0.0.1:3000/depoimentos';
 const athleteFilterFields = [
   { id: 'athlete-year', key: 'year', apiKey: 'ano' },
   { id: 'athlete-discipline', key: 'event', apiKey: 'prova' },
@@ -24,17 +25,21 @@ function initTestimonialActions() {
   const form = dialog.querySelector('form');
   const title = dialog.querySelector('h2');
   const field = dialog.querySelector('.testimonial-editor__field');
+  const sourceInput = form.elements.namedItem('source');
   const subjectInput = form.elements.namedItem('subject');
   const input = dialog.querySelector('textarea');
   const confirmation = dialog.querySelector('.testimonial-editor__confirmation');
   const submit = dialog.querySelector('[type="submit"]');
   const status = section.querySelector('[role="status"]');
+  const emptyCardTemplate = grid.querySelector('.testimonial-card').cloneNode(true);
   let activeCard = null;
   let activeAction = '';
+  let apiReady = false;
 
-  grid.querySelectorAll('.testimonial-card').forEach((card, index) => {
+  function setCardActions(card, index) {
     const actions = document.createElement('div');
     actions.className = 'testimonial-card__actions';
+    actions.hidden = true;
     [['edit', 'Editar', 'icone-editar.png'], ['delete', 'Excluir', 'icone-excluir.png']].forEach(([action, label, filename]) => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -49,16 +54,72 @@ function initTestimonialActions() {
       actions.append(button);
     });
     card.querySelector('article').append(actions);
-  });
+  }
+
+  grid.querySelectorAll('.testimonial-card').forEach(setCardActions);
+
+  function createCard() {
+    const card = emptyCardTemplate.cloneNode(true);
+    setCardActions(card, grid.children.length);
+    grid.append(card);
+    return card;
+  }
+
+  function getEmptyCard() {
+    return [...grid.querySelectorAll('.testimonial-card')].find((card) => !card.dataset.testimonialId)
+      || createCard();
+  }
+
+  function formatPublicationDate(date) {
+    if (!date) return '';
+    const isoDate = /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : '';
+    if (!isoDate) return date;
+    const [year, month, day] = isoDate.split('-');
+    return `${day}/${month}/${year}`;
+  }
+
+  function renderCard(card, testimonial) {
+    card.dataset.testimonialId = testimonial.id;
+    card.dataset.source = testimonial.source;
+    card.dataset.publicationDate = testimonial.publicationDate;
+    card.querySelector('.testimonial-card__name').textContent = testimonial.subject;
+    card.querySelector('.testimonial-card__role').textContent =
+      `Publicado por ${testimonial.source} em ${formatPublicationDate(testimonial.publicationDate)}`;
+    card.querySelector('.testimonial-card__quote p').textContent = testimonial.quote;
+    card.querySelector('.testimonial-card__actions').hidden = false;
+  }
+
+  function clearCard(card) {
+    delete card.dataset.testimonialId;
+    delete card.dataset.source;
+    delete card.dataset.publicationDate;
+    card.querySelector('.testimonial-card__name').textContent = 'Atleta UCA Master';
+    card.querySelector('.testimonial-card__role').textContent = 'Atletismo Master';
+    card.querySelector('.testimonial-card__quote p').textContent = 'Depoimento em breve.';
+    card.querySelector('.testimonial-card__actions').hidden = true;
+  }
+
+  async function requestApi(url, options = {}) {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new Error(`A API respondeu com o status ${response.status}.`);
+    }
+    if (response.status === 204) return null;
+    return response.json();
+  }
 
   grid.addEventListener('click', (event) => {
     const button = event.target.closest('[data-testimonial-action]');
     if (!button) return;
     activeCard = button.closest('.testimonial-card');
+    if (!activeCard?.dataset.testimonialId) return;
     activeAction = button.dataset.testimonialAction;
     const editing = activeAction === 'edit';
     title.textContent = editing ? 'Editar' : 'Excluir depoimento';
     field.hidden = !editing;
+    sourceInput.disabled = !editing;
+    sourceInput.setCustomValidity('');
+    sourceInput.value = activeCard.dataset.source;
     subjectInput.disabled = !editing;
     subjectInput.setCustomValidity('');
     subjectInput.value = activeCard.querySelector('.testimonial-card__name').textContent;
@@ -75,30 +136,61 @@ function initTestimonialActions() {
 
   dialog.querySelector('[data-testimonial-cancel]').addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => { activeCard = null; });
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!activeCard) return;
+    if (!apiReady) {
+      status.textContent = 'A API de depoimentos não está disponível. Inicie o backend e tente novamente.';
+      return;
+    }
     if (activeAction === 'edit') {
-      for (const control of [subjectInput, input]) {
+      for (const control of [sourceInput, subjectInput, input]) {
         if (!control.value.trim()) {
           control.setCustomValidity('Preencha este campo.');
           control.reportValidity();
           return;
         }
       }
-      activeCard.querySelector('.testimonial-card__name').textContent = subjectInput.value.trim();
-      activeCard.querySelector('.testimonial-card__quote p').textContent = input.value.trim();
-      dialog.close();
-      status.textContent = 'Depoimento atualizado.';
+      const testimonial = {
+        source: sourceInput.value.trim(),
+        subject: subjectInput.value.trim(),
+        quote: input.value.trim(),
+        publicationDate: activeCard.dataset.publicationDate
+      };
+      submit.disabled = true;
+      try {
+        const savedTestimonial = await requestApi(
+          `${testimonialsApi}/${encodeURIComponent(activeCard.dataset.testimonialId)}`,
+          { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(testimonial) }
+        );
+        renderCard(activeCard, savedTestimonial || { ...testimonial, id: activeCard.dataset.testimonialId });
+        dialog.close();
+        status.textContent = 'Depoimento atualizado e salvo.';
+      } catch (error) {
+        status.textContent = `Não foi possível atualizar o depoimento. ${error.message}`;
+      } finally {
+        submit.disabled = false;
+      }
     } else {
-      const nextCard = activeCard.nextElementSibling || activeCard.previousElementSibling;
-      activeCard.remove();
-      dialog.close();
-      status.textContent = grid.children.length ? 'Depoimento excluído.' : 'Nenhum depoimento disponível.';
-      (nextCard?.querySelector('button') || section.querySelector('h2')).focus();
+      const cardToDelete = activeCard;
+      const nextCard = cardToDelete.nextElementSibling || cardToDelete.previousElementSibling;
+      submit.disabled = true;
+      try {
+        await requestApi(`${testimonialsApi}/${encodeURIComponent(cardToDelete.dataset.testimonialId)}`, {
+          method: 'DELETE'
+        });
+        clearCard(cardToDelete);
+        dialog.close();
+        status.textContent = 'Depoimento excluído do banco de dados.';
+        (nextCard?.querySelector('button') || section.querySelector('h2')).focus();
+      } catch (error) {
+        status.textContent = `Não foi possível excluir o depoimento. ${error.message}`;
+      } finally {
+        submit.disabled = false;
+      }
     }
   });
-  [subjectInput, input].forEach((control) => {
+  [sourceInput, subjectInput, input].forEach((control) => {
     control.addEventListener('input', () => control.setCustomValidity(''));
   });
 
@@ -106,12 +198,8 @@ function initTestimonialActions() {
   if (!registration) return;
   const registrationStatus = registration.querySelector('[role="status"]');
   const publicationDate = registration.elements.namedItem('publicationDate');
-  const registeredCards = new WeakSet();
-  const targets = [
-    ['source', '.testimonial-card__role', 'Atletismo Master'],
-    ['subject', '.testimonial-card__name', 'Atleta UCA Master'],
-    ['quote', '.testimonial-card__quote p', 'Depoimento em breve.']
-  ];
+  const registrationSubmit = registration.querySelector('[type="submit"]');
+  const targets = ['source', 'subject', 'quote'];
 
   function updatePublicationDate() {
     const today = new Date();
@@ -134,37 +222,69 @@ function initTestimonialActions() {
   });
   registration.querySelector('[data-testimonial-registration-cancel]').addEventListener('click', () => {
     registration.reset();
-    targets.forEach(([name]) => registration.elements.namedItem(name).setCustomValidity(''));
+    targets.forEach((name) => registration.elements.namedItem(name).setCustomValidity(''));
     publicationDate.setCustomValidity('');
     registrationStatus.textContent = '';
     window.location.hash = 'depoimentos';
   });
-  registration.addEventListener('submit', (event) => {
+  registration.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const values = targets.map(([name]) => registration.elements.namedItem(name).value.trim());
+    if (!apiReady) {
+      registrationStatus.textContent = 'A API de depoimentos não está disponível. Inicie o backend e tente novamente.';
+      return;
+    }
+    const values = targets.map((name) => registration.elements.namedItem(name).value.trim());
     const emptyIndex = values.findIndex((value) => !value);
     if (emptyIndex !== -1) {
-      const emptyField = registration.elements.namedItem(targets[emptyIndex][0]);
+      const emptyField = registration.elements.namedItem(targets[emptyIndex]);
       emptyField.setCustomValidity('Preencha este campo.');
       emptyField.reportValidity();
       return;
     }
-    const isoDate = updatePublicationDate();
-    const card = [...grid.querySelectorAll('.testimonial-card')].find((item) =>
-      !registeredCards.has(item) && targets.every(([, selector, placeholder]) =>
-        item.querySelector(selector).textContent === placeholder));
-    if (!card) {
-      registrationStatus.textContent = 'Não há cards disponíveis para um novo depoimento.';
-      return;
+    const testimonial = {
+      source: values[0],
+      subject: values[1],
+      quote: values[2],
+      publicationDate: updatePublicationDate()
+    };
+    registrationSubmit.disabled = true;
+    try {
+      const savedTestimonial = await requestApi(testimonialsApi, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(testimonial)
+      });
+      if (!savedTestimonial?.id) {
+        throw new Error('A API não retornou o identificador do depoimento salvo.');
+      }
+      renderCard(getEmptyCard(), savedTestimonial);
+      registration.reset();
+      status.textContent = 'Depoimento adicionado e salvo no banco de dados.';
+      window.location.hash = 'depoimentos';
+    } catch (error) {
+      registrationStatus.textContent = `Não foi possível salvar o depoimento. ${error.message}`;
+    } finally {
+      registrationSubmit.disabled = false;
     }
-    values[0] = `Publicado por ${values[0]} em ${publicationDate.value}`;
-    targets.forEach(([, selector], index) => { card.querySelector(selector).textContent = values[index]; });
-    card.dataset.publicationDate = isoDate;
-    registeredCards.add(card);
-    registration.reset();
-    status.textContent = 'Depoimento adicionado.';
-    window.location.hash = 'depoimentos';
   });
+
+  requestApi(testimonialsApi)
+    .then((testimonials) => {
+      if (!Array.isArray(testimonials)) {
+        throw new Error('A resposta da API não contém uma lista de depoimentos.');
+      }
+      testimonials.forEach((testimonial) => {
+        if (!testimonial.id || !testimonial.source || !testimonial.subject || !testimonial.quote || !testimonial.publicationDate) {
+          throw new Error('Há um depoimento incompleto no banco de dados.');
+        }
+        renderCard(getEmptyCard(), testimonial);
+      });
+      apiReady = true;
+    })
+    .catch((error) => {
+      status.textContent = `Não foi possível carregar os depoimentos. Inicie o backend e recarregue a página. ${error.message}`;
+      registrationStatus.textContent = 'O backend não está conectado. As alterações não poderão ser salvas.';
+    });
 }
 
 function initAthleteSearch(form) {

@@ -983,6 +983,10 @@ body .site-header__submenu-link:focus:not(:focus-visible):not(:hover) {
   gap: 4px;
 }
 
+.testimonial-card__actions[hidden] {
+  display: none;
+}
+
 .testimonial-card__action {
   display: grid;
   width: 32px;
