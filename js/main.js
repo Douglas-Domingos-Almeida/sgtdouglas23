@@ -15,6 +15,158 @@ const athleteFilterFields = [
   { id: 'athlete-category', key: 'category', apiKey: 'categoria' }
 ];
 
+function initTestimonialActions() {
+  const section = document.getElementById('depoimentos');
+  if (!section) return;
+
+  const grid = section.querySelector('.testimonials-grid');
+  const dialog = section.querySelector('.testimonial-editor');
+  const form = dialog.querySelector('form');
+  const title = dialog.querySelector('h2');
+  const field = dialog.querySelector('.testimonial-editor__field');
+  const subjectInput = form.elements.namedItem('subject');
+  const input = dialog.querySelector('textarea');
+  const confirmation = dialog.querySelector('.testimonial-editor__confirmation');
+  const submit = dialog.querySelector('[type="submit"]');
+  const status = section.querySelector('[role="status"]');
+  let activeCard = null;
+  let activeAction = '';
+
+  grid.querySelectorAll('.testimonial-card').forEach((card, index) => {
+    const actions = document.createElement('div');
+    actions.className = 'testimonial-card__actions';
+    [['edit', 'Editar', 'icone-editar.png'], ['delete', 'Excluir', 'icone-excluir.png']].forEach(([action, label, filename]) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'testimonial-card__action';
+      button.dataset.testimonialAction = action;
+      button.title = `${label} depoimento`;
+      button.setAttribute('aria-label', `${label} depoimento ${index + 1}`);
+      const icon = document.createElement('img');
+      icon.src = new URL(`../imagens/Icones/${filename}`, mainScriptUrl).href;
+      icon.alt = '';
+      button.append(icon);
+      actions.append(button);
+    });
+    card.querySelector('article').append(actions);
+  });
+
+  grid.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-testimonial-action]');
+    if (!button) return;
+    activeCard = button.closest('.testimonial-card');
+    activeAction = button.dataset.testimonialAction;
+    const editing = activeAction === 'edit';
+    title.textContent = editing ? 'Editar' : 'Excluir depoimento';
+    field.hidden = !editing;
+    subjectInput.disabled = !editing;
+    subjectInput.setCustomValidity('');
+    subjectInput.value = activeCard.querySelector('.testimonial-card__name').textContent;
+    input.disabled = !editing;
+    input.setCustomValidity('');
+    input.value = activeCard.querySelector('.testimonial-card__quote p').textContent;
+    confirmation.hidden = editing;
+    confirmation.textContent = `Excluir o depoimento de ${activeCard.querySelector('.testimonial-card__name').textContent}? Esta ação não pode ser desfeita.`;
+    submit.textContent = editing ? 'Salvar' : 'Excluir';
+    status.textContent = '';
+    dialog.showModal();
+    (editing ? subjectInput : dialog.querySelector('[data-testimonial-cancel]')).focus();
+  });
+
+  dialog.querySelector('[data-testimonial-cancel]').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('close', () => { activeCard = null; });
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!activeCard) return;
+    if (activeAction === 'edit') {
+      for (const control of [subjectInput, input]) {
+        if (!control.value.trim()) {
+          control.setCustomValidity('Preencha este campo.');
+          control.reportValidity();
+          return;
+        }
+      }
+      activeCard.querySelector('.testimonial-card__name').textContent = subjectInput.value.trim();
+      activeCard.querySelector('.testimonial-card__quote p').textContent = input.value.trim();
+      dialog.close();
+      status.textContent = 'Depoimento atualizado.';
+    } else {
+      const nextCard = activeCard.nextElementSibling || activeCard.previousElementSibling;
+      activeCard.remove();
+      dialog.close();
+      status.textContent = grid.children.length ? 'Depoimento excluído.' : 'Nenhum depoimento disponível.';
+      (nextCard?.querySelector('button') || section.querySelector('h2')).focus();
+    }
+  });
+  [subjectInput, input].forEach((control) => {
+    control.addEventListener('input', () => control.setCustomValidity(''));
+  });
+
+  const registration = document.querySelector('.testimonial-registration__form');
+  if (!registration) return;
+  const registrationStatus = registration.querySelector('[role="status"]');
+  const publicationDate = registration.elements.namedItem('publicationDate');
+  const registeredCards = new WeakSet();
+  const targets = [
+    ['source', '.testimonial-card__role', 'Atletismo Master'],
+    ['subject', '.testimonial-card__name', 'Atleta UCA Master'],
+    ['quote', '.testimonial-card__quote p', 'Depoimento em breve.']
+  ];
+
+  function updatePublicationDate() {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = String(today.getFullYear());
+    publicationDate.defaultValue = `${day}/${month}/${year}`;
+    publicationDate.value = publicationDate.defaultValue;
+    return `${year}-${month}-${day}`;
+  }
+
+  updatePublicationDate();
+  window.addEventListener('hashchange', () => {
+    if (window.location.hash === '#cadastro-depoimento') updatePublicationDate();
+  });
+
+  registration.addEventListener('input', (event) => {
+    if (event.target.matches('input, textarea')) event.target.setCustomValidity('');
+    registrationStatus.textContent = '';
+  });
+  registration.querySelector('[data-testimonial-registration-cancel]').addEventListener('click', () => {
+    registration.reset();
+    targets.forEach(([name]) => registration.elements.namedItem(name).setCustomValidity(''));
+    publicationDate.setCustomValidity('');
+    registrationStatus.textContent = '';
+    window.location.hash = 'depoimentos';
+  });
+  registration.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const values = targets.map(([name]) => registration.elements.namedItem(name).value.trim());
+    const emptyIndex = values.findIndex((value) => !value);
+    if (emptyIndex !== -1) {
+      const emptyField = registration.elements.namedItem(targets[emptyIndex][0]);
+      emptyField.setCustomValidity('Preencha este campo.');
+      emptyField.reportValidity();
+      return;
+    }
+    const isoDate = updatePublicationDate();
+    const card = [...grid.querySelectorAll('.testimonial-card')].find((item) =>
+      !registeredCards.has(item) && targets.every(([, selector, placeholder]) =>
+        item.querySelector(selector).textContent === placeholder));
+    if (!card) {
+      registrationStatus.textContent = 'Não há cards disponíveis para um novo depoimento.';
+      return;
+    }
+    values[0] = `Publicado por ${values[0]} em ${publicationDate.value}`;
+    targets.forEach(([, selector], index) => { card.querySelector(selector).textContent = values[index]; });
+    card.dataset.publicationDate = isoDate;
+    registeredCards.add(card);
+    registration.reset();
+    status.textContent = 'Depoimento adicionado.';
+    window.location.hash = 'depoimentos';
+  });
+}
+
 function initAthleteSearch(form) {
   const results = document.getElementById('athlete-results-content');
   const status = document.getElementById('athlete-results-status');
@@ -764,6 +916,7 @@ function initJuntosPodemosVideos() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initTestimonialActions();
   initJuntosPodemosVideos();
 
   const desktopVideoQuery = window.matchMedia('(min-width: 901px)');
@@ -1443,6 +1596,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (hash === 'cadastro') {
       showView('cadastro');
+      return;
+    }
+
+    if (hash === 'cadastro-depoimento') {
+      showView('cadastro-depoimento');
       return;
     }
 

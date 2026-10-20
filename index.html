@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Projeto UCA</title>
-  <link rel="stylesheet" href="css/style-modern.css?v=20261015-news-images">
+  <link rel="stylesheet" href="css/style-modern.css?v=20261020-editor-labels-bold">
 </head>
 <body>
   <!-- Classes do topo: site-header controla a barra; site-header__navigation e button--header recebem o contraste escuro. -->
@@ -39,7 +39,7 @@
           <div class="site-header__submenu-panel" id="register-submenu" hidden>
             <a class="site-header__submenu-link" href="#noticias" data-route="noticias">Notícias</a>
             <a class="site-header__submenu-link" href="#proximos-eventos">Evento</a>
-            <a class="site-header__submenu-link" href="#depoimentos">Depoimento</a>
+            <a class="site-header__submenu-link" href="#cadastro-depoimento" data-route="cadastro-depoimento">Depoimento</a>
           </div>
         </div>
         <a href="#atualizacoes" class="site-header__link">Sobre Nós</a>
@@ -65,9 +65,38 @@
       <p class="site-search__status" role="status" hidden></p>
     </form>  </header>
 
-  <script src="js/main.js?v=20261014-register-menu-2"></script>
+  <script src="js/main.js?v=20261020-testimonial-editor"></script>
   <script src="js/news-data.js?v=20261014-file-support" charset="utf-8" defer></script>
   <script src="js/news.js?v=20261015-news-image-hover" defer></script>
+
+  <section class="testimonial-registration page__view page__view--hidden page" data-view="cadastro-depoimento" aria-hidden="true" inert>
+    <h1>Adicione um depoimento novo:</h1>
+    <form class="testimonial-registration__form">
+      <div class="testimonial-registration__row">
+        <div class="testimonial-registration__field">
+          <label for="testimonial-source">Autoria ou Fonte</label>
+          <input id="testimonial-source" name="source" type="text" placeholder="Insira a autoria ou fonte" required>
+        </div>
+        <div class="testimonial-registration__field testimonial-registration__field--date">
+          <label for="testimonial-publication-date">Data de publicação</label>
+          <input id="testimonial-publication-date" name="publicationDate" type="text" placeholder="DD/MM/AAAA" readonly>
+        </div>
+      </div>
+      <div class="testimonial-registration__field">
+        <label for="testimonial-subject">Tema ou Assunto</label>
+        <input id="testimonial-subject" name="subject" type="text" placeholder="Insira o tema ou assunto" required>
+      </div>
+      <div class="testimonial-registration__field">
+        <label for="testimonial-text">Depoimento</label>
+        <textarea id="testimonial-text" name="quote" rows="3" maxlength="3000" placeholder="Insira o depoimento" required></textarea>
+      </div>
+      <p class="testimonial-registration__status" role="status" aria-live="polite"></p>
+      <div class="testimonial-registration__actions">
+        <button class="button button--primary" type="submit">Adicionar</button>
+        <button class="button button--secondary" type="button" data-testimonial-registration-cancel>Cancelar</button>
+      </div>
+    </form>
+  </section>
 
   <main class="page-home page__view page" data-view="home" aria-hidden="false">
     <section class="transformar-uniao" aria-labelledby="transformar-uniao-title">
@@ -334,6 +363,23 @@
           </article>
         </li>
       </ul>
+      <p class="testimonials-section__status" role="status" aria-live="polite"></p>
+      <dialog class="testimonial-editor" aria-labelledby="testimonial-editor-title">
+        <form method="dialog">
+          <h2 id="testimonial-editor-title">Editar</h2>
+          <div class="testimonial-editor__field">
+            <label for="testimonial-editor-subject">Tema ou Assunto</label>
+            <input id="testimonial-editor-subject" name="subject" type="text" required>
+            <label for="testimonial-editor-text">Depoimento</label>
+            <textarea id="testimonial-editor-text" name="quote" rows="6" maxlength="3000" required></textarea>
+          </div>
+          <p class="testimonial-editor__confirmation" hidden></p>
+          <div class="testimonial-editor__actions">
+            <button class="button button--secondary" type="button" data-testimonial-cancel>Cancelar</button>
+            <button class="button button--primary" type="submit">Salvar</button>
+          </div>
+        </form>
+      </dialog>
     </section>
 
     <section class="section-intro" id="quem-somos">

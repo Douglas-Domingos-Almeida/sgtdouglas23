@@ -858,6 +858,7 @@ body .site-header__submenu-link:focus:not(:focus-visible):not(:hover) {
 }
 
 .testimonial-card article {
+  position: relative;
   display: flex;
   height: 100%;
   flex-direction: column;
@@ -936,11 +937,21 @@ body .site-header__submenu-link:focus:not(:focus-visible):not(:hover) {
   align-items: flex-start;
   justify-content: center;
   margin: 0;
-  padding: 18px 16px 24px;
+  padding: 60px 16px 52px;
   border: 1px solid var(--green-dark);
   border-radius: 15px;
   color: var(--muted);
   line-height: 1.6;
+}
+
+.testimonial-card__quote::before {
+  position: absolute;
+  top: 18px;
+  left: 16px;
+  width: 40px;
+  aspect-ratio: 64 / 51;
+  background: url("../imagens/Icones/aspas-azuis.png") no-repeat center / contain;
+  content: "";
 }
 
 .testimonial-card__quote::after {
@@ -960,6 +971,267 @@ body .site-header__submenu-link:focus:not(:focus-visible):not(:hover) {
 
 .testimonial-card__quote p {
   margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.testimonial-card__actions {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  gap: 4px;
+}
+
+.testimonial-card__action {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  padding: 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.testimonial-card__action img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.testimonial-card__action:hover {
+  background: rgb(0 0 0 / 6%);
+}
+
+.testimonial-card__action:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+.testimonials-section__status {
+  max-width: 1100px;
+  margin: 16px auto 0;
+  color: var(--muted);
+}
+
+.testimonials-section__status:empty {
+  display: none;
+}
+
+.testimonial-editor {
+  width: min(480px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 24px;
+  border: 1px solid var(--green-dark);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--navy);
+}
+
+.testimonial-editor::backdrop {
+  background: rgb(0 0 0 / 40%);
+}
+
+.testimonial-editor h2 {
+  margin: 0 0 20px;
+  font-size: 1.25rem;
+}
+
+.testimonial-editor__field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.testimonial-editor__field input,
+.testimonial-editor__field textarea {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--muted);
+  border-radius: 4px;
+  color: inherit;
+  font: inherit;
+}
+
+.testimonial-editor__field input {
+  margin-bottom: 16px;
+}
+
+.testimonial-editor__field textarea {
+  resize: vertical;
+}
+
+.testimonial-editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.testimonial-registration {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+  scroll-margin-top: 180px;
+  color: #080f38;
+}
+
+.testimonial-registration.page__view--hidden {
+  display: none;
+}
+
+.testimonial-registration h1 {
+  margin: 0 0 40px;
+  scroll-margin-top: 180px;
+  font-size: 2.5rem;
+  line-height: 1.2;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.testimonial-registration__form {
+  padding: 32px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 36px rgb(0 0 0 / 6%);
+}
+
+.testimonial-registration__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: end;
+  gap: 28px;
+}
+
+.testimonial-registration__row + .testimonial-registration__field,
+.testimonial-registration__form > .testimonial-registration__field + .testimonial-registration__field {
+  margin-top: 28px;
+}
+
+.testimonial-registration__field label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.testimonial-registration__field--date {
+  width: max-content;
+  max-width: 100%;
+}
+
+.testimonial-registration__field--date label {
+  font-size: 1.125rem;
+}
+
+.testimonial-registration__field input,
+.testimonial-registration__field textarea {
+  display: block;
+  width: 100%;
+  padding: 18px 20px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #edf1f5;
+  color: #080f38;
+  font: inherit;
+  font-size: 1.25rem;
+}
+
+.testimonial-registration__field--date input {
+  width: 12ch;
+  min-width: 100%;
+  padding-inline: 10px;
+  text-align: center;
+}
+
+.testimonial-registration__field textarea {
+  resize: vertical;
+}
+
+.testimonial-registration__field input::placeholder,
+.testimonial-registration__field textarea::placeholder {
+  color: #737e90;
+  opacity: 1;
+}
+
+.testimonial-registration__field input:focus-visible,
+.testimonial-registration__field textarea:focus-visible {
+  outline: 2px solid #080f38;
+  outline-offset: 2px;
+}
+
+.testimonial-registration__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 36px;
+}
+
+.testimonial-registration__actions .button {
+  min-width: 180px;
+  padding: 12px 28px;
+  border: 2px solid #080f38;
+  border-radius: 999px;
+  font-size: 1.25rem;
+}
+
+.testimonial-registration__actions .button--primary {
+  background: #00172f;
+  color: #fff;
+}
+
+.testimonial-registration__actions .button--secondary {
+  background: #f5f6f8;
+  color: #080f38;
+}
+
+.testimonial-registration__status {
+  margin: 16px 0 0;
+}
+
+.testimonial-registration__status:empty {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .testimonial-registration {
+    padding: 32px 16px;
+  }
+
+  .testimonial-registration h1 {
+    margin-bottom: 24px;
+    font-size: 1.75rem;
+  }
+
+  .testimonial-registration__form {
+    padding: 20px;
+  }
+
+  .testimonial-registration__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .testimonial-registration__field label {
+    font-size: 1.125rem;
+  }
+
+  .testimonial-registration__field input,
+  .testimonial-registration__field textarea {
+    padding: 14px 12px;
+    font-size: 1rem;
+  }
+
+  .testimonial-registration__actions .button {
+    min-width: 0;
+    flex: 1 1 120px;
+    padding-inline: 16px;
+    font-size: 1rem;
+  }
 }
 
 .news-section__event-grid {
