@@ -3,7 +3,7 @@
     {
       "label": "Serve site locally",
       "type": "shell",
-      "command": "py -m http.server 8000",
+      "command": "npm run dev",
       "options": {
         "cwd": "${workspaceFolder}"
       },

@@ -3,7 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "start": "json-server --watch db.json --host 127.0.0.1 --port 3000"
+    "start": "node server.js",
+    "auth:setup": "node scripts/setup-admin.js",
+    "auth:hash": "node scripts/create-admin-hash.js",
+    "test": "node --test --test-concurrency=1"
   },
   "devDependencies": {
     "json-server": "0.17.4"

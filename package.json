@@ -4,9 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/dev.js",
+    "admin:setup": "node BackEnd/scripts/setup-admin.js",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "npm --prefix BackEnd test"
   },
   "devDependencies": {
     "vite": "^7.1.7"

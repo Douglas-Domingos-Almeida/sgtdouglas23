@@ -1,5 +1,6 @@
 const mainScriptUrl = document.currentScript.src;
 const mobileVideoUrl = new URL('../Videos/Video UCA.mp4', mainScriptUrl).href;
+const apiBaseUrl = document.querySelector('meta[name="uca-api-base"]')?.content || 'http://127.0.0.1:3000';
 const juntosPodemosVideoUrls = {
   velocista: new URL('../Videos/Velocista de Blumenau é dono da melhor marca do mundo na categoria master.mp4', mainScriptUrl).href,
   billCollins: new URL('../Videos/Bill Collins M65 world record in 100.mp4', mainScriptUrl).href,
@@ -8,7 +9,7 @@ const juntosPodemosVideoUrls = {
   masterPta2022: new URL('../Videos/100m masculino cat 35 anos Master Pta 2022.mp4', mainScriptUrl).href
 };
 const athleteRankingApi = 'https://atletismomasters.com.br/wp-json/atletismo-rankings/v1/';
-const testimonialsApi = 'http://127.0.0.1:3000/depoimentos';
+const testimonialsApi = new URL('/depoimentos', apiBaseUrl).href;
 const athleteFilterFields = [
   { id: 'athlete-year', key: 'year', apiKey: 'ano' },
   { id: 'athlete-discipline', key: 'event', apiKey: 'prova' },
@@ -57,6 +58,12 @@ function initTestimonialActions() {
   }
 
   grid.querySelectorAll('.testimonial-card').forEach(setCardActions);
+  window.addEventListener('uca-admin-auth-change', () => {
+    grid.querySelectorAll('.testimonial-card').forEach((card) => {
+      const actions = card.querySelector('.testimonial-card__actions');
+      actions.hidden = !card.dataset.testimonialId || !window.UcaAdminAuth?.isAuthenticated();
+    });
+  });
 
   function createCard() {
     const card = emptyCardTemplate.cloneNode(true);
@@ -86,7 +93,7 @@ function initTestimonialActions() {
     card.querySelector('.testimonial-card__role').textContent =
       `Publicado por ${testimonial.source} em ${formatPublicationDate(testimonial.publicationDate)}`;
     card.querySelector('.testimonial-card__quote p').textContent = testimonial.quote;
-    card.querySelector('.testimonial-card__actions').hidden = false;
+    card.querySelector('.testimonial-card__actions').hidden = !window.UcaAdminAuth?.isAuthenticated();
   }
 
   function clearCard(card) {
@@ -100,7 +107,8 @@ function initTestimonialActions() {
   }
 
   async function requestApi(url, options = {}) {
-    const response = await fetch(url, options);
+    if (!window.UcaAdminAuth) throw new Error('O módulo de autenticação administrativa não está disponível.');
+    const response = await window.UcaAdminAuth.request(url, options);
     if (!response.ok) {
       throw new Error(`A API respondeu com o status ${response.status}.`);
     }
@@ -1589,42 +1597,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderNewsCards();
   }
 
-  initCardCarousel(
-    document.querySelector('#eventsGrid'),
-    [
-      {
-        id: 1,
-        title: 'Taça Paraná de Atletismo Master',
-        meta: 'Em breve',
-        text: 'A data e os detalhes deste evento serão divulgados assim que confirmados.',
-        imageClass: 'news-card__image--event-one',
-        ariaLabel: 'Imagem da Taça Parana 2026'
-      },
-      {
-        id: 2,
-        title: 'Trofeu Brasil de Atletismo Master',
-        meta: 'Em breve',
-        text: 'Publicaremos aqui as informações de participação e programação.',
-        imageClass: 'news-card__image--two',
-        ariaLabel: 'Imagem de voluntários em atividade'
-      },
-      {
-        id: 3,
-        title: 'Ação solidária',
-        meta: 'Em breve',
-        text: 'Novidades sobre esta ação serão publicadas quando estiverem disponíveis.',
-        imageClass: 'news-card__image--three',
-        ariaLabel: 'Imagem de recursos para projetos sociais'
-      }
-    ],
-    {
-      newTitle: 'Novo Evento',
-      newText: 'A data e os detalhes deste evento serão divulgados assim que confirmados.',
-      imageOptions: ['news-card__image--event-one', 'news-card__image--two', 'news-card__image--three', 'news-card__image--event-four'],
-      newItemExtras: () => ({ meta: 'Em breve' })
-    }
-  );
-
   const faqItems = document.querySelectorAll('.transformar-faq__item');
 
   faqItems.forEach((item) => {
@@ -1698,9 +1670,28 @@ document.addEventListener('DOMContentLoaded', () => {
   function handleRoute() {
     const hash = window.location.hash.replace('#', '').trim();
     const homeSectionHashes = ['home', 'inicio', 'quem-somos', 'projetos', 'recursos', 'voluntarios', 'atualizacoes', 'contato', 'doar', ''];
+    const adminRoutes = new Set(['cadastro-competicao', 'cadastro-depoimento']);
+
+    if (adminRoutes.has(hash)) {
+      if (!window.UcaAdminAuth) {
+        showView('home');
+        return;
+      }
+      window.UcaAdminAuth.requireAdmin(hash).then((authorized) => {
+        if (window.location.hash.replace('#', '').trim() === hash) {
+          showView(authorized ? hash : 'home');
+        }
+      });
+      return;
+    }
 
     if (hash === 'noticias') {
       showView('noticias');
+      return;
+    }
+
+    if (hash === 'cadastro-competicao') {
+      showView('cadastro-competicao');
       return;
     }
 
@@ -1773,5 +1764,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   window.addEventListener('hashchange', handleRoute);
+  window.addEventListener('uca-admin-auth-change', () => {
+    const hash = window.location.hash.replace('#', '').trim();
+    if (['cadastro-competicao', 'cadastro-depoimento'].includes(hash)) {
+      handleRoute();
+    }
+  });
   handleRoute();
 });

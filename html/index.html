@@ -1,12 +1,23 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="uca-api-base" content="http://127.0.0.1:3000">
   <title>Projeto UCA</title>
-  <link rel="stylesheet" href="../css/style-modern.css?v=20261015-news-images">
+  <link rel="stylesheet" href="../css/style-modern.css?v=20261027-competition-upload">
 </head>
 <body>
+  <p class="news-registration__status" id="localServerNotice" role="alert" hidden>
+    Este site foi aberto como arquivo local. A seleção de imagens, o arrastar e soltar e o cadastro precisam do servidor local.
+    Execute <code>npm run dev</code> na pasta do projeto e
+    <a href="http://127.0.0.1:5173/#cadastro-competicao">abra o cadastro pelo servidor local</a>.
+  </p>
+  <script>
+    if (window.location.protocol === 'file:') {
+      document.getElementById('localServerNotice').hidden = false;
+    }
+  </script>
   <!-- Classes do topo: site-header controla a barra; site-header__navigation e button--header recebem o contraste escuro. -->
   <header class="site-header">
     <a class="site-header__brand" href="#" aria-label="Transformar - início">
@@ -38,7 +49,7 @@
           </button>
           <div class="site-header__submenu-panel" id="register-submenu" hidden>
             <a class="site-header__submenu-link" href="#noticias" data-route="noticias">Notícias</a>
-            <a class="site-header__submenu-link" href="#proximos-eventos">Evento</a>
+            <a class="site-header__submenu-link" href="#cadastro-competicao" data-route="cadastro-competicao">Competição</a>
             <a class="site-header__submenu-link" href="../index.html#cadastro-depoimento">Depoimento</a>
           </div>
         </div>
@@ -52,6 +63,7 @@
           <path d="M15.5 15.5 21 21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
         </svg>
       </button>
+      <button class="site-header__link admin-auth__toggle" type="button" data-admin-auth-toggle>Entrar</button>
       <a class="button--header button" href="#cadastro" data-route="cadastro">Junte se a Nós</a>
     </div>
     <form class="site-search" id="site-search" role="search" aria-label="Pesquisar no site" hidden>
@@ -64,10 +76,125 @@
       </button>
       <p class="site-search__status" role="status" hidden></p>
     </form>  </header>
+    <dialog class="admin-auth-dialog" id="adminAuthDialog" aria-labelledby="adminAuthTitle">
+      <form class="admin-auth-dialog__form" id="adminAuthForm">
+        <h2 id="adminAuthTitle">Acesso administrativo</h2>
+        <p>Entre com a conta administrativa configurada no servidor.</p>
+        <label for="adminAuthUsername">Usuário</label>
+        <input id="adminAuthUsername" name="username" type="text" autocomplete="username" maxlength="100" required>
+        <label for="adminAuthPassword">Senha</label>
+        <input id="adminAuthPassword" name="password" type="password" autocomplete="current-password" required>
+        <p class="admin-auth-dialog__status" id="adminAuthStatus" role="status" aria-live="polite"></p>
+        <div class="admin-auth-dialog__actions">
+          <button class="button button--secondary" type="button" data-admin-auth-cancel>Cancelar</button>
+          <button class="button button--primary" type="submit">Entrar</button>
+        </div>
+      </form>
+    </dialog>
+
 
   <script src="../js/main.js"></script>
   <script src="../js/news-data.js?v=20261014-file-support" charset="utf-8" defer></script>
   <script src="../js/news.js?v=20261015-news-image-hover" defer></script>
+
+    <script type="module" src="../js/admin-auth.js?v=20261026-admin-auth"></script>
+    <script type="module" src="../js/competitions.js?v=20261026-competitions-v3"></script>
+
+  <main class="competition-registration news-registration page__view page__view--hidden page" data-view="cadastro-competicao" aria-hidden="true" inert>
+    <div class="news-registration__container">
+      <nav class="news-breadcrumb news-registration__breadcrumb" aria-label="Breadcrumb">
+        <a href="#home" data-route="home">Início</a>
+        <span aria-hidden="true">/</span>
+        <span>Cadastro</span>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Competições</span>
+      </nav>
+      <section class="news-registration__card" aria-labelledby="competition-registration-title">
+        <header class="news-registration__header">
+          <h1 id="competition-registration-title" tabindex="-1">Cadastrar Competição</h1>
+          <p>Cadastre as informações que serão exibidas nos cards de próximas competições.</p>
+        </header>
+
+        <form class="competition-form" id="competitionForm">
+          <div class="competition-form__fields">
+            <section class="competition-form__image-section" aria-labelledby="competition-image-title">
+              <h2 id="competition-image-title">Imagem da Competição</h2>
+              <label class="competition-form__dropzone" id="competitionImageDropzone" for="competitionImage">
+                <input class="competition-form__file-input" id="competitionImage" name="image" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required aria-label="Selecionar imagem da competição" aria-describedby="competitionImageHelp competitionFormStatus">
+                <svg class="competition-form__upload-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path d="M14 37H11a8 8 0 0 1-.5-16A13 13 0 0 1 35 18a9.5 9.5 0 0 1 2 19h-3M24 40V24m0 0-7 7m7-7 7 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="competition-form__upload-copy"><strong data-competition-upload-label>Clique para selecionar uma imagem</strong><span>ou arraste e solte aqui</span></span>
+                <span class="competition-form__select-image">Selecionar imagem</span>
+                <small id="competitionImageHelp">Formatos: JPG, PNG | Tamanho máximo: 2 MB | Recomendado: 800 x 530 px</small>
+              </label>
+              <div class="competition-form__preview-wrap" id="competitionImagePreviewWrap" hidden>
+                <img class="competition-form__preview" id="competitionImagePreview" alt="Pré-visualização da imagem da competição">
+                <button class="competition-form__remove-image" id="competitionRemoveImage" type="button">Remover imagem</button>
+              </div>
+            </section>
+
+            <div class="news-registration__field competition-form__name-field">
+              <label for="competitionName">Evento / Nome da Competição</label>
+              <input id="competitionName" name="name" type="text" maxlength="100" placeholder="Digite o nome da competição" required aria-describedby="competitionNameCount">
+              <small class="competition-form__counter" id="competitionNameCount">0/100</small>
+            </div>
+
+            <fieldset class="competition-form__choice-group">
+              <legend>Tipo da Competição</legend>
+              <label class="competition-form__radio-option">
+                <input type="radio" name="category" value="Nacional" checked required>
+                <span>1. Nacionais</span>
+              </label>
+              <label class="competition-form__radio-option">
+                <input type="radio" name="category" value="Internacional" required>
+                <span>2. Internacionais</span>
+              </label>
+            </fieldset>
+
+            <fieldset class="competition-form__choice-group competition-form__status-group">
+              <legend>Status das Inscrições</legend>
+              <label class="competition-form__status-option competition-form__status-option--open">
+                <input type="radio" name="enrollmentStatus" value="open" checked required>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 3v4M8 3v4M3 10h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <span>Inscrições Abertas</span>
+              </label>
+              <label class="competition-form__status-option competition-form__status-option--closed">
+                <input type="radio" name="enrollmentStatus" value="closed" required>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h2M14 14h2M8 17h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <span>Inscrições Encerradas</span>
+              </label>
+            </fieldset>
+
+            <div class="news-registration__field competition-form__date-field">
+              <label for="competitionExpectedDate">Data Prevista.:</label>
+              <div class="competition-form__date-range">
+                <input id="competitionExpectedDate" name="expectedDate" type="date" aria-label="Data inicial prevista" aria-describedby="competitionDateHelp">
+                <span aria-hidden="true">a</span>
+                <input id="competitionExpectedEndDate" name="expectedEndDate" type="date" aria-label="Data final prevista" aria-describedby="competitionDateHelp">
+              </div>
+              <small id="competitionDateHelp">Informe as datas inicial e final previstas da competição (dd/mm/aaaa a dd/mm/aaaa).</small>
+            </div>
+
+            <div class="news-registration__field competition-form__description-field">
+              <label for="competitionDescription">Descrição (opcional)</label>
+              <textarea id="competitionDescription" name="description" rows="3" maxlength="500" placeholder="Digite informações adicionais sobre a competição..." aria-describedby="competitionDescriptionCount"></textarea>
+              <small class="competition-form__counter" id="competitionDescriptionCount">0/500</small>
+            </div>
+          </div>
+          <p class="news-registration__status" id="competitionFormStatus" role="status" aria-live="polite"></p>
+          <div class="news-registration__actions">
+            <a class="button button--secondary" href="#proximos-eventos" data-competition-cancel>Cancelar</a>
+            <button class="button button--secondary" id="competitionCancelEdit" type="button" hidden>Cancelar edição</button>
+            <button class="button button--primary" id="competitionSubmit" type="submit">Salvar Competição</button>
+          </div>
+        </form>
+      </section>
+      <section class="competition-management" aria-labelledby="competition-management-title">
+        <h2 id="competition-management-title">Competições cadastradas</h2>
+        <p class="competition-management__status" id="competitionManagementStatus" role="status" aria-live="polite">Carregando competições...</p>
+        <div class="competition-management__list" id="competitionManagementList"></div>
+      </section>
+    </div>
+  </main>
 
   <main class="page-home page__view page" data-view="home" aria-hidden="false">
     <section class="juntos-podemos-videos" id="inicio" aria-label="Atletismo Master">
@@ -262,27 +389,45 @@
       <div class="news-card-grid news-card-grid--home" id="homeNewsGrid" aria-live="polite" aria-busy="true"></div>
     </section>
 
-    <section class="news-section" id="proximos-eventos" aria-labelledby="upcoming-events-title">
+    <section class="news-section competition-section" id="proximos-eventos" aria-labelledby="upcoming-events-title">
       <div class="news-section__header">
         <div class="news-section__heading">
-          <span class="news-section__tag">Eventos</span>
-          <h2 id="upcoming-events-title">Proximos Eventos</h2>
+          <h2 id="upcoming-events-title">Próximas Competições</h2>
         </div>
-        <a class="news-section__button" href="#contato" aria-label="Entre em contato para saber sobre os próximos eventos">Entre em contato</a>
+        <a class="news-section__button" href="#contato" aria-label="Entre em contato para saber sobre as próximas competições">Entre em contato</a>
       </div>
 
-      <p class="news-section__intro">Acompanhe aqui as informações dos nossos próximos eventos.</p>
-      <div class="news-carousel">
-        <button class="news-carousel__button news-carousel__button--previous" type="button" aria-label="Ver eventos anteriores" disabled>
-          <span class="news-carousel__chevron news-carousel__chevron--left" aria-hidden="true"></span>
-        </button>
-        <div class="news-carousel__viewport">
-          <div class="news-carousel__track" id="eventsGrid" aria-live="polite"></div>
+      <section class="competition-category" aria-labelledby="competition-national-title">
+        <h3 id="competition-national-title">1. Nacionais</h3>
+        <div class="news-carousel competition-carousel" data-competition-carousel="Nacional">
+          <button class="news-carousel__button news-carousel__button--previous" type="button" aria-label="Ver competições nacionais anteriores" disabled hidden>
+            <span class="news-carousel__chevron news-carousel__chevron--left" aria-hidden="true"></span>
+          </button>
+          <div class="news-carousel__viewport">
+            <div class="news-carousel__track competition-carousel__track" data-competition-track="Nacional" aria-live="polite"></div>
+          </div>
+          <button class="news-carousel__button news-carousel__button--next" type="button" aria-label="Ver próximas competições nacionais" disabled hidden>
+            <span class="news-carousel__chevron news-carousel__chevron--right" aria-hidden="true"></span>
+          </button>
         </div>
-        <button class="news-carousel__button news-carousel__button--next" type="button" aria-label="Ver próximos eventos">
-          <span class="news-carousel__chevron news-carousel__chevron--right" aria-hidden="true"></span>
-        </button>
-      </div>
+        <p class="competition-category__empty" data-competition-empty="Nacional" hidden>Nenhuma competição nacional cadastrada.</p>
+      </section>
+
+      <section class="competition-category" aria-labelledby="competition-international-title">
+        <h3 id="competition-international-title">2. Internacionais</h3>
+        <div class="news-carousel competition-carousel" data-competition-carousel="Internacional">
+          <button class="news-carousel__button news-carousel__button--previous" type="button" aria-label="Ver competições internacionais anteriores" disabled hidden>
+            <span class="news-carousel__chevron news-carousel__chevron--left" aria-hidden="true"></span>
+          </button>
+          <div class="news-carousel__viewport">
+            <div class="news-carousel__track competition-carousel__track" data-competition-track="Internacional" aria-live="polite"></div>
+          </div>
+          <button class="news-carousel__button news-carousel__button--next" type="button" aria-label="Ver próximas competições internacionais" disabled hidden>
+            <span class="news-carousel__chevron news-carousel__chevron--right" aria-hidden="true"></span>
+          </button>
+        </div>
+        <p class="competition-category__empty" data-competition-empty="Internacional" hidden>Nenhuma competição internacional cadastrada.</p>
+      </section>
     </section>
 
     <section class="contact-section" id="contato">
