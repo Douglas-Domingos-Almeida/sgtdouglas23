@@ -345,11 +345,7 @@ function initAthleteSearch(form) {
   let selectedHistoryAthlete = '';
   let activeHistoryOptionIndex = -1;
 
-  const normalize = (value) => String(value ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLocaleLowerCase('pt-BR')
-    .trim();
+  const normalize = window.UCAUtils.normalizeText;
 
   function showError(error) {
     if (error.name === 'AbortError') return;
@@ -1147,7 +1143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchStatus = siteSearch.querySelector('.site-search__status');
     let highlightTimer = null;
 
-    const normalizeText = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const normalizeText = window.UCAUtils.normalizeText;
 
     const setSearchOpen = (isOpen, restoreFocus = false) => {
       siteSearch.hidden = !isOpen;

@@ -1,5 +1,7 @@
 (() => {
-  const newsFiles = Array.from({ length: 8 }, (_, index) => `Noticia(${index + 1}).md`);
+  const newsFiles = window.NEWS_SOURCES
+    ? Object.keys(window.NEWS_SOURCES)
+    : Array.from({ length: 8 }, (_, index) => `Noticia(${index + 1}).md`);
   const newsDirectory = '/conteudo/noticias/';
   // A raiz do site é deduzida da posição deste script, para funcionar também em file:/// e em subpastas.
   const siteRoot = document.currentScript?.src ? new URL('../', document.currentScript.src) : new URL('./', window.location.href);
@@ -139,6 +141,23 @@
       && item.imageAlt
       && item.imageAlt !== pendingValue
       && item.content;
+  }
+
+  function getCover(item, showPreview = true) {
+    const preview = showPreview && item.status === 'draft' ? previewCovers[item.id] : null;
+    const image = preview?.src || (item.coverImage && item.coverImage !== pendingValue ? item.coverImage : '');
+    return { preview, image };
+  }
+
+  function getSummary(item) {
+    const excerpt = item.excerpt || '';
+    if (excerpt && !/POSTADO EM:/i.test(excerpt)) return excerpt;
+
+    return item.content
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .split(/\r?\n\s*\r?\n/)
+      .map((paragraph) => paragraph.trim())
+      .find((paragraph) => paragraph && !/^#{1,6}\s/.test(paragraph)) || '';
   }
 
   function hasAvailableCover(item) {
@@ -317,8 +336,7 @@
     cardContent.href = makeSlugHref(item.slug, item.id);
     cardContent.setAttribute('aria-label', `Ler notícia: ${item.title}`);
 
-    const previewCover = preview && item.status === 'draft' ? previewCovers[item.id] : null;
-    const coverImage = previewCover?.src || (item.coverImage && item.coverImage !== pendingValue ? item.coverImage : '');
+    const { preview: previewCover, image: coverImage } = getCover(item, preview);
     if (coverImage) {
       const media = document.createElement('div');
       media.className = 'news-story-card__media';
@@ -365,16 +383,7 @@
     body.append(title);
 
     const excerpt = document.createElement('p');
-    const originalExcerpt = item.excerpt || '';
-    const firstParagraph = item.content
-      .replace(/<!--[\s\S]*?-->/g, '')
-      .split(/\r?\n\s*\r?\n/)
-      .map((paragraph) => paragraph.trim())
-      .find((paragraph) => paragraph && !/^#{1,6}\s/.test(paragraph)) || '';
-    const summary = !originalExcerpt || /POSTADO EM:/i.test(originalExcerpt)
-      ? firstParagraph
-      : originalExcerpt;
-    excerpt.textContent = summary;
+    excerpt.textContent = getSummary(item);
     body.append(excerpt);
 
     cardContent.append(body);
@@ -395,13 +404,7 @@
     else delete element.dataset.state;
   }
 
-  function normalizeText(value) {
-    return String(value || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLocaleLowerCase('pt-BR')
-      .trim();
-  }
+  const normalizeText = window.UCAUtils.normalizeText;
 
   function populateFilters() {
     const years = new Set();
@@ -503,8 +506,7 @@
     link.className = 'news-article__related-link';
     link.href = makeSlugHref(item.slug, item.id);
 
-    const previewCover = item.status === 'draft' ? previewCovers[item.id] : null;
-    const coverImage = previewCover?.src || (item.coverImage && item.coverImage !== pendingValue ? item.coverImage : '');
+    const { image: coverImage } = getCover(item);
     if (coverImage) {
       const image = document.createElement('img');
       image.className = 'news-article__related-image';
@@ -544,14 +546,7 @@
     title.textContent = item.title;
     details.append(title);
 
-    const firstParagraph = item.content
-      .replace(/<!--[\s\S]*?-->/g, '')
-      .split(/\r?\n\s*\r?\n/)
-      .map((paragraph) => paragraph.trim())
-      .find((paragraph) => paragraph && !/^#{1,6}\s/.test(paragraph)) || '';
-    const summary = !item.excerpt || /POSTADO EM:/i.test(item.excerpt)
-      ? firstParagraph
-      : item.excerpt;
+    const summary = getSummary(item);
     if (summary) {
       const excerpt = document.createElement('span');
       excerpt.className = 'news-article__related-excerpt';
@@ -624,8 +619,7 @@
 
     const figure = document.createElement('figure');
     figure.className = 'news-article__figure';
-    const previewCover = item.status === 'draft' ? previewCovers[item.id] : null;
-    const coverImage = previewCover?.src || (item.coverImage && item.coverImage !== pendingValue ? item.coverImage : '');
+    const { preview: previewCover, image: coverImage } = getCover(item);
     if (coverImage) {
       const image = document.createElement('img');
       image.src = resolveAsset(coverImage);
