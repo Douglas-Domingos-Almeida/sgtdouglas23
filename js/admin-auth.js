@@ -318,10 +318,6 @@
 
   dialog?.querySelector('[data-admin-auth-cancel]')?.addEventListener('click', () => {
     dialog.close();
-    if (window.location.hash.replace('#', '').trim().startsWith('cadastro')
-      && !session.authenticated) {
-      window.location.hash = 'home';
-    }
   });
 
   dialog?.querySelector('[data-auth-home]')?.addEventListener('click', () => {

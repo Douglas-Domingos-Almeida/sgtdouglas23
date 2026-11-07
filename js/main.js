@@ -1678,13 +1678,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ]);
 
     if (registrationRoutes.has(hash)) {
-      showView('home');
+      showView(hash);
       if (!window.UcaAdminAuth) {
         return;
       }
-      window.UcaAdminAuth.requireRegistration(hash).then((authorized) => {
+      window.UcaAdminAuth.requireRegistration(hash).then(() => {
         if (window.location.hash.replace('#', '').trim() === hash) {
-          showView(authorized ? hash : 'home');
+          showView(hash);
         }
       });
       return;
