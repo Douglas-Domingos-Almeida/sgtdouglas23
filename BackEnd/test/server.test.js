@@ -23,6 +23,7 @@ const passwordHash = `scrypt$${adminSalt.toString('hex')}$${adminHash.toString('
 const validPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jpXQAAAAASUVORK5CYII=';
 let temporaryDirectory;
 let databasePath;
+let authDatabasePath;
 let baseUrl;
 let backend;
 let sessionCookie = '';
@@ -52,17 +53,37 @@ async function waitForServer() {
 }
 
 async function api(pathname, options = {}) {
-  const { admin, ...requestOptions } = options;
+  const { admin, auth, ...requestOptions } = options;
   const headers = new Headers(requestOptions.headers || {});
   headers.set('Origin', appOrigin);
-  if (sessionCookie) headers.set('Cookie', sessionCookie);
-  if (admin) headers.set('X-CSRF-Token', csrfToken);
+  const cookie = auth?.cookie || sessionCookie;
+  if (cookie) headers.set('Cookie', cookie);
+  const requestCsrfToken = admin ? csrfToken : auth?.csrfToken;
+  if (requestCsrfToken) headers.set('X-CSRF-Token', requestCsrfToken);
   return fetch(`${baseUrl}${pathname}`, { ...requestOptions, headers });
+}
+
+async function login(username, password) {
+  const response = await fetch(`${baseUrl}/auth/login`, {
+    method: 'POST',
+    headers: { Origin: appOrigin, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
+  const body = await response.json();
+  return {
+    response,
+    body,
+    auth: {
+      cookie: response.headers.get('set-cookie')?.split(';', 1)[0] || '',
+      csrfToken: body.csrfToken || ''
+    }
+  };
 }
 
 before(async () => {
   temporaryDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'uca-auth-test-'));
   databasePath = path.join(temporaryDirectory, 'db.json');
+  authDatabasePath = path.join(temporaryDirectory, 'users.sqlite');
   await fs.writeFile(databasePath, JSON.stringify({
     depoimentos: [],
     noticias: [{
@@ -96,6 +117,7 @@ before(async () => {
       APP_ORIGIN: appOrigin,
       AUTH_COOKIE_SECURE: 'false',
       DB_PATH: databasePath,
+      UCA_AUTH_DB_PATH: authDatabasePath,
       NODE_ENV: 'test',
       PORT: String(port)
     },
@@ -123,6 +145,7 @@ after(async () => {
 test('anônimos não consultam a base completa nem alteram recursos da API', async () => {
   const rootResponse = await api('/');
   assert.equal(rootResponse.status, 404);
+  assert.equal((await api('/auth/users')).status, 401);
 
   const requests = [
     ['POST', '/competicoes', { body: '{}' }],
@@ -149,20 +172,16 @@ test('login rejeita credenciais inválidas e não retorna dados sensíveis', asy
     body: JSON.stringify({ username: adminUsername, password: crypto.randomBytes(16).toString('hex') })
   });
   assert.equal(response.status, 401);
-  assert.deepEqual(await response.json(), { message: 'Usuário ou senha inválidos.' });
+  assert.deepEqual(await response.json(), { message: 'Usuário ou senha incorretos.' });
   assert.equal(response.headers.get('set-cookie'), null);
 });
 
 test('login administrativo emite cookie protegido e CSRF sem expor credenciais', async () => {
-  const response = await api('/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: adminUsername, password: adminPassword })
-  });
+  const { response, body } = await login(adminUsername, adminPassword);
   assert.equal(response.status, 200);
-  const body = await response.json();
   assert.equal(body.authenticated, true);
   assert.equal(body.role, 'admin');
+  assert.equal(body.username, adminUsername);
   assert.equal(typeof body.csrfToken, 'string');
   assert.equal(body.csrfToken.length, 64);
   assert.equal(JSON.stringify(body).includes(adminPassword), false);
@@ -177,8 +196,105 @@ test('login administrativo emite cookie protegido e CSRF sem expor credenciais',
   const session = await api('/auth/session');
   assert.deepEqual(await session.json(), {
     authenticated: true,
+    username: adminUsername,
     role: 'admin',
     csrfToken
+  });
+});
+
+test('administrador cria membros, que podem usar o cadastro mas não gerenciar usuários', async () => {
+  const memberUsername = `uca-member-${crypto.randomBytes(6).toString('hex')}`;
+  const memberPassword = crypto.randomBytes(32).toString('base64url');
+  const created = await api('/auth/users', {
+    method: 'POST',
+    admin: true,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: memberUsername, password: memberPassword, role: 'member' })
+  });
+  assert.equal(created.status, 201);
+  const createdBody = await created.json();
+  assert.deepEqual(Object.keys(createdBody).sort(), ['createdAt', 'role', 'username']);
+  assert.equal(createdBody.role, 'member');
+  assert.equal(JSON.stringify(createdBody).includes(memberPassword), false);
+
+  const users = await api('/auth/users');
+  assert.equal(users.status, 200);
+  const usersBody = await users.json();
+  assert.equal(usersBody.some((user) => user.username === memberUsername), true);
+  assert.equal(JSON.stringify(usersBody).includes('passwordHash'), false);
+
+  const memberLogin = await login(memberUsername, memberPassword);
+  assert.equal(memberLogin.response.status, 200);
+  assert.equal(memberLogin.body.role, 'member');
+  assert.equal(memberLogin.body.username, memberUsername);
+
+  const memberSession = await api('/auth/session', { auth: memberLogin.auth });
+  assert.equal((await memberSession.json()).role, 'member');
+
+  const memberCompetition = {
+    id: crypto.randomUUID(),
+    name: 'Competição criada por membro',
+    category: 'Nacional',
+    enrollmentStatus: 'open',
+    expectedDate: '2026-12-20',
+    expectedEndDate: '2026-12-22',
+    description: 'Cadastro permitido para Membro UCA.',
+    image: validPng
+  };
+  const memberWrite = await api('/competicoes', {
+    auth: memberLogin.auth,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(memberCompetition)
+  });
+  assert.equal(memberWrite.status, 201, 'membros autenticados podem usar as operações de cadastro');
+  const cleanupMemberRecord = await api(`/competicoes/${memberCompetition.id}`, {
+    admin: true,
+    method: 'DELETE'
+  });
+  assert.equal(cleanupMemberRecord.status, 200);
+
+  const memberListUsers = await api('/auth/users', { auth: memberLogin.auth });
+  assert.equal(memberListUsers.status, 403);
+  const memberCreateUser = await api('/auth/users', {
+    auth: memberLogin.auth,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: `uca-denied-${crypto.randomBytes(4).toString('hex')}`,
+      password: crypto.randomBytes(24).toString('base64url'),
+      role: 'member'
+    })
+  });
+  assert.equal(memberCreateUser.status, 403);
+});
+
+test('usuário pode alterar a senha e a senha anterior deixa de autenticar', async () => {
+  const username = `uca-password-${crypto.randomBytes(6).toString('hex')}`;
+  const currentPassword = crypto.randomBytes(32).toString('base64url');
+  const newPassword = crypto.randomBytes(32).toString('base64url');
+  const created = await api('/auth/users', {
+    method: 'POST',
+    admin: true,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password: currentPassword, role: 'admin' })
+  });
+  assert.equal(created.status, 201);
+
+  const authenticated = await login(username, currentPassword);
+  assert.equal(authenticated.response.status, 200);
+  const changed = await api('/auth/password', {
+    auth: authenticated.auth,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ currentPassword, newPassword })
+  });
+  assert.equal(changed.status, 204);
+
+  assert.equal((await login(username, currentPassword)).response.status, 401);
+  assert.equal((await login(username, newPassword)).response.status, 200);
+  assert.deepEqual(await (await api('/auth/session', { auth: authenticated.auth })).json(), {
+    authenticated: false
   });
 });
 
@@ -207,7 +323,7 @@ test('CSRF e origem são validados antes de qualquer mutação administrativa', 
   assert.equal(wrongOrigin.status, 403);
 });
 
-test('CRUD de competição exige função admin, valida a imagem e persiste somente dados válidos', async () => {
+test('CRUD de competição autenticado valida a imagem e persiste somente dados válidos', async () => {
   const competition = {
     id: crypto.randomUUID(),
     name: 'Competição de teste temporária',

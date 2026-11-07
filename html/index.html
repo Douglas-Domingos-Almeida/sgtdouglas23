@@ -1,11 +1,11 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="uca-api-base" content="http://127.0.0.1:3000">
   <title>Projeto UCA</title>
-  <link rel="stylesheet" href="../css/style-modern.css?v=20261027-competition-upload">
+  <link rel="stylesheet" href="../css/style-modern.css?v=20261109-rbac">
 </head>
 <body>
   <p class="news-registration__status" id="localServerNotice" role="alert" hidden>
@@ -19,7 +19,7 @@
     }
   </script>
   <!-- Classes do topo: site-header controla a barra; site-header__navigation e button--header recebem o contraste escuro. -->
-  <header class="site-header">
+  <header class="site-header site-header--home">
     <a class="site-header__brand" href="#" aria-label="Transformar - início">
       <span class="site-header__brand-tagline">ORGULHO DE SER!</span>
       <img class="logo" src="../imagens/Simbolo%20da%20UCA%20(1).png" alt="Símbolo da UCA">
@@ -42,13 +42,13 @@
             <a class="site-header__submenu-link" href="#resultado-complemento">Complemento</a>
           </div>
         </div>
-        <div class="site-header__submenu">
+        <div class="site-header__submenu" data-registration-access hidden>
           <button class="site-header__link site-header__submenu-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="register-submenu">
             Cadastro
             <span class="site-header__submenu-chevron" aria-hidden="true">&#9662;</span>
           </button>
           <div class="site-header__submenu-panel" id="register-submenu" hidden>
-            <a class="site-header__submenu-link" href="#noticias" data-route="noticias">Notícias</a>
+            <a class="site-header__submenu-link" href="#cadastro-noticia" data-route="cadastro-noticia">Notícia</a>
             <a class="site-header__submenu-link" href="#cadastro-competicao" data-route="cadastro-competicao">Competição</a>
             <a class="site-header__submenu-link" href="../index.html#cadastro-depoimento">Depoimento</a>
           </div>
@@ -63,8 +63,7 @@
           <path d="M15.5 15.5 21 21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
         </svg>
       </button>
-      <button class="site-header__link admin-auth__toggle" type="button" data-admin-auth-toggle>Entrar</button>
-      <a class="button--header button" href="#cadastro" data-route="cadastro">Junte se a Nós</a>
+      <button class="button--header button admin-auth__toggle" type="button" data-admin-auth-toggle>Acesso UCA</button>
     </div>
     <form class="site-search" id="site-search" role="search" aria-label="Pesquisar no site" hidden>
       <input class="site-search__input" id="site-search-input" name="q" type="search" placeholder="Pesquisar no site..." aria-label="Pesquisar no site" autocomplete="off">
@@ -78,28 +77,126 @@
     </form>  </header>
     <dialog class="admin-auth-dialog" id="adminAuthDialog" aria-labelledby="adminAuthTitle">
       <form class="admin-auth-dialog__form" id="adminAuthForm">
-        <h2 id="adminAuthTitle">Acesso administrativo</h2>
-        <p>Entre com a conta administrativa configurada no servidor.</p>
+        <h2 id="adminAuthTitle">Acesso UCA<br>Administrador / Membros</h2>
+        <p class="admin-auth-dialog__notice"><strong>Acesso restrito a membros</strong><br><small>(Não tem uma conta? Solicite seu cadastro com o administrador)</small></p>
         <label for="adminAuthUsername">Usuário</label>
         <input id="adminAuthUsername" name="username" type="text" autocomplete="username" maxlength="100" required>
         <label for="adminAuthPassword">Senha</label>
         <input id="adminAuthPassword" name="password" type="password" autocomplete="current-password" required>
+        <button class="admin-auth-dialog__password-toggle" type="button" data-password-visibility aria-pressed="false">Mostrar senha</button>
         <p class="admin-auth-dialog__status" id="adminAuthStatus" role="status" aria-live="polite"></p>
         <div class="admin-auth-dialog__actions">
-          <button class="button button--secondary" type="button" data-admin-auth-cancel>Cancelar</button>
+          <button class="button button--secondary" type="button" data-auth-home>Voltar à página inicial</button>
           <button class="button button--primary" type="submit">Entrar</button>
         </div>
       </form>
+      <section class="admin-auth-dialog__form" id="adminAuthAccount" aria-labelledby="adminAuthAccountTitle" hidden>
+        <h2 id="adminAuthAccountTitle">Minha conta</h2>
+        <p>Usuário: <strong data-auth-username></strong></p>
+        <form id="adminPasswordChangeForm">
+          <label for="adminCurrentPassword">Senha atual</label>
+          <input id="adminCurrentPassword" name="currentPassword" type="password" autocomplete="current-password" required>
+          <label for="adminNewPassword">Nova senha</label>
+          <input id="adminNewPassword" name="newPassword" type="password" autocomplete="new-password" minlength="16" maxlength="1024" required>
+          <p class="admin-auth-dialog__status" id="adminAuthAccountStatus" role="status" aria-live="polite"></p>
+          <div class="admin-auth-dialog__actions">
+            <button class="button button--secondary" type="button" data-admin-logout>Encerrar sessão</button>
+            <button class="button button--primary" type="submit">Alterar senha</button>
+          </div>
+        </form>
+      </section>
     </dialog>
 
-
-  <script src="../js/text-utils.js?v=20261021-dry-refactor"></script>
-  <script src="../js/main.js?v=20261021-dry-refactor"></script>
-  <script src="../js/news-data.js?v=20261014-file-support" charset="utf-8" defer></script>
-  <script src="../js/news.js?v=20261021-dry-refactor" defer></script>
-
-    <script type="module" src="../js/admin-auth.js?v=20261026-admin-auth"></script>
+    <script src="../js/text-utils.js?v=20261021-dry-refactor"></script>
+    <script src="../js/main.js?v=20261109-rbac"></script>
+    <script src="../js/news-data.js?v=20261014-file-support" charset="utf-8" defer></script>
+    <script src="../js/news.js?v=20261024-news-badges" defer></script>
+    <script type="module" src="../js/admin-auth.js?v=20261109-rbac"></script>
     <script type="module" src="../js/competitions.js?v=20261026-competitions-v3"></script>
+
+  <main class="news-registration page__view page__view--hidden page" data-view="cadastro-noticia" aria-hidden="true" inert>
+    <div class="news-registration__container">
+      <nav class="news-breadcrumb news-registration__breadcrumb" aria-label="Breadcrumb">
+        <a href="#home" data-route="home">Início</a>
+        <span aria-hidden="true">/</span>
+        <span>Cadastro</span>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">Notícia</span>
+      </nav>
+      <section class="news-registration__card" aria-labelledby="news-registration-title">
+        <header class="news-registration__header">
+          <h1 id="news-registration-title" tabindex="-1">Cadastrar Notícia</h1>
+          <p>Publique notícias, conquistas, histórias e novidades do Atletismo Master e da equipe UCA Master.</p>
+        </header>
+
+        <form class="news-registration__form" id="newsRegistrationForm">
+          <section class="news-registration__image-section" aria-labelledby="news-registration-image-title">
+            <h2 id="news-registration-image-title">Imagem de destaque</h2>
+            <p class="news-registration__help">Adicione uma foto relacionada à notícia, como imagens dos atletas, competições, pódios, treinamentos ou eventos da UCA Master.<br>Formatos aceitos: JPG, PNG ou WEBP, até 2 MB.</p>
+            <div class="news-registration__image-row">
+              <div class="news-registration__upload">
+                <input class="news-registration__file-input" id="newsImage" name="image" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" aria-describedby="newsImageHelp newsRegistrationStatus">
+                <label class="news-registration__upload-button" for="newsImage">
+                  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M12 16V3m0 0L7 8m5-5 5 5M4 15v5h16v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span data-news-upload-label>Adicionar imagem</span>
+                </label>
+                <p class="news-registration__help" id="newsImageHelp">Imagem opcional. A foto será salva junto com a notícia.</p>
+              </div>
+              <div class="news-registration__field news-registration__field--caption">
+                <label for="newsImageCaption">Legenda da foto</label>
+                <input id="newsImageCaption" name="imageCaption" type="text" maxlength="240" placeholder="Ex.: Equipe UCA no pódio da Taça Brasil Master 2026">
+              </div>
+            </div>
+            <div class="news-registration__preview" id="newsImagePreview" hidden>
+              <img id="newsImagePreviewImage" alt="Prévia da imagem selecionada">
+              <button class="news-registration__replace" type="button" data-news-remove-image>Remover imagem</button>
+            </div>
+          </section>
+
+          <div class="news-registration__options">
+            <p class="news-registration__eyebrow">Mais opções</p>
+            <div class="news-registration__options-grid">
+              <div class="news-registration__field">
+                <label for="newsCategory">Categoria da notícia</label>
+                <p class="news-registration__help" id="newsCategoryHelp">Selecione a categoria que melhor representa o conteúdo.</p>
+                <select id="newsCategory" name="category" required>
+                  <option>Notícias da UCA Master</option>
+                  <option>Competições</option>
+                  <option>Resultados e conquistas</option>
+                  <option>Histórias de atletas</option>
+                  <option>Eventos e comunicados</option>
+                  <option>Atletismo Master em geral</option>
+                </select>
+              </div>
+              <div class="news-registration__field">
+                <label for="newsPublicationDate">Data de publicação</label>
+                <p class="news-registration__help" id="newsPublicationDateHelp">Informe quando a notícia será publicada.</p>
+                <input id="newsPublicationDate" name="publishedAt" type="date" required aria-describedby="newsPublicationDateHelp">
+              </div>
+            </div>
+          </div>
+
+          <div class="news-registration__field news-registration__field--title">
+            <label for="newsTitle">Título da notícia (obrigatório)</label>
+            <p class="news-registration__help">Informe um título claro e atrativo para a notícia que será publicada no portal da UCA Master.</p>
+            <input id="newsTitle" name="title" type="text" maxlength="180" placeholder="Ex.: UCA Master conquista medalhas em competição nacional" required>
+          </div>
+
+          <div class="news-registration__field news-registration__field--content">
+            <label for="newsContent">Conteúdo da notícia (obrigatório)</label>
+            <p class="news-registration__help">Escreva a notícia com os detalhes do acontecimento, nomes dos atletas, resultados, datas, locais e informações relevantes para a comunidade UCA Master.</p>
+            <textarea id="newsContent" name="content" rows="6" maxlength="20000" placeholder="Digite aqui o conteúdo da notícia..." required></textarea>
+          </div>
+
+          <p class="news-registration__status" id="newsRegistrationStatus" role="status" aria-live="polite"></p>
+          <div class="news-registration__actions">
+            <a class="button button--secondary" href="#noticias" data-route="noticias">Cancelar</a>
+            <button class="button button--primary" type="submit">Publicar notícia</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
 
   <main class="competition-registration news-registration page__view page__view--hidden page" data-view="cadastro-competicao" aria-hidden="true" inert>
     <div class="news-registration__container">
@@ -596,6 +693,29 @@
     </section>
 
     <section class="page-cadastro page__view page__view--hidden page" data-view="cadastro" aria-hidden="true">
+    <section class="admin-user-management" data-user-management hidden aria-labelledby="adminUserManagementTitle">
+      <h2 id="adminUserManagementTitle">Gerenciar usuários</h2>
+      <form id="adminUserCreateForm">
+        <div class="admin-user-management__field">
+          <label for="adminNewUsername">Usuário</label>
+          <input id="adminNewUsername" name="username" type="text" maxlength="100" autocomplete="off" required>
+        </div>
+        <div class="admin-user-management__field">
+          <label for="adminNewUserRole">Perfil</label>
+          <select id="adminNewUserRole" name="role" required>
+            <option value="member">Membro UCA</option>
+            <option value="admin">Administrador UCA</option>
+          </select>
+        </div>
+        <div class="admin-user-management__field">
+          <label for="adminNewUserPassword">Senha temporária (mínimo 16 caracteres)</label>
+          <input id="adminNewUserPassword" name="password" type="password" autocomplete="new-password" minlength="16" maxlength="1024" required>
+        </div>
+        <button class="button button--primary" type="submit">Criar usuário</button>
+      </form>
+      <p id="adminUserStatus" role="status" aria-live="polite"></p>
+      <ul id="adminUserList"></ul>
+    </section>
     <section class="registration-card" aria-labelledby="page-title">
       <section class="registration-card__hero">
         <figure class="registration-card__brand">

@@ -1141,18 +1141,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = siteSearch.querySelector('.site-search__input');
     const searchClose = siteSearch.querySelector('.site-search__close');
     const searchStatus = siteSearch.querySelector('.site-search__status');
+    const mobileHeaderQuery = window.matchMedia('(max-width: 640px)');
     let highlightTimer = null;
 
     const normalizeText = window.UCAUtils.normalizeText;
 
-    const setSearchOpen = (isOpen, restoreFocus = false) => {
-      siteSearch.hidden = !isOpen;
-      searchToggle.setAttribute('aria-expanded', String(isOpen));
+    const setSearchOpen = (isOpen, restoreFocus = false, focusInput = true) => {
+      const shouldOpen = isOpen || mobileHeaderQuery.matches;
+      siteSearch.hidden = !shouldOpen;
+      searchToggle.setAttribute('aria-expanded', String(!mobileHeaderQuery.matches && shouldOpen));
       searchStatus.hidden = true;
 
-      if (isOpen) {
+      if (isOpen && focusInput) {
         searchInput.focus();
-      } else if (restoreFocus) {
+      } else if (!shouldOpen && restoreFocus) {
         searchToggle.focus();
       }
     };
@@ -1202,6 +1204,7 @@ document.addEventListener('DOMContentLoaded', () => {
     searchToggle.addEventListener('click', () => setSearchOpen(siteSearch.hidden));
     searchClose.addEventListener('click', () => setSearchOpen(false, true));
     searchInput.addEventListener('input', () => { searchStatus.hidden = true; });
+    mobileHeaderQuery.addEventListener('change', (event) => setSearchOpen(event.matches, false, false));
     siteSearch.addEventListener('submit', (event) => {
       event.preventDefault();
       runSearch();
@@ -1212,6 +1215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (event) => {
       if (!siteSearch.hidden && !siteSearch.contains(event.target) && !searchToggle.contains(event.target)) setSearchOpen(false);
     });
+    setSearchOpen(mobileHeaderQuery.matches, false, false);
   }
   const heroVideo = document.querySelector('.hero__video');
   const heroSection = document.querySelector('.hero');
@@ -1255,7 +1259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function getVisibleCardCount() {
       if (window.matchMedia('(max-width: 640px)').matches) return 1;
       if (window.matchMedia('(max-width: 900px)').matches) return 2;
-      return 3;
+      return 4;
     }
 
     function updateCarousel() {
@@ -1666,14 +1670,19 @@ document.addEventListener('DOMContentLoaded', () => {
   function handleRoute() {
     const hash = window.location.hash.replace('#', '').trim();
     const homeSectionHashes = ['home', 'inicio', 'quem-somos', 'projetos', 'recursos', 'voluntarios', 'atualizacoes', 'contato', 'doar', ''];
-    const adminRoutes = new Set(['cadastro-competicao', 'cadastro-depoimento']);
+    const registrationRoutes = new Set([
+      'cadastro',
+      'cadastro-noticia',
+      'cadastro-competicao',
+      'cadastro-depoimento'
+    ]);
 
-    if (adminRoutes.has(hash)) {
+    if (registrationRoutes.has(hash)) {
+      showView('home');
       if (!window.UcaAdminAuth) {
-        showView('home');
         return;
       }
-      window.UcaAdminAuth.requireAdmin(hash).then((authorized) => {
+      window.UcaAdminAuth.requireRegistration(hash).then((authorized) => {
         if (window.location.hash.replace('#', '').trim() === hash) {
           showView(authorized ? hash : 'home');
         }
@@ -1686,11 +1695,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (hash === 'cadastro-competicao') {
-      showView('cadastro-competicao');
-      return;
-    }
-
     if (hash.startsWith('noticia/')) {
       showView('noticia');
       return;
@@ -1698,16 +1702,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (homeSectionHashes.includes(hash)) {
       showView('home');
-      return;
-    }
-
-    if (hash === 'cadastro') {
-      showView('cadastro');
-      return;
-    }
-
-    if (hash === 'cadastro-depoimento') {
-      showView('cadastro-depoimento');
       return;
     }
 
@@ -1745,24 +1739,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!route) return;
 
       event.preventDefault();
+      const currentRoute = window.location.hash.replace('#', '').trim();
       window.location.hash = route;
-      showView(route);
+      if (currentRoute === route) handleRoute();
 
       if (window.closeMainNavigation) window.closeMainNavigation();
-
-      const activeView = document.querySelector(`.page__view[data-view="${route}"]`);
-      const heading = activeView?.querySelector('h1, h2');
-      if (heading) {
-        heading.setAttribute('tabindex', '-1');
-        heading.focus();
-      }
     });
   });
 
   window.addEventListener('hashchange', handleRoute);
   window.addEventListener('uca-admin-auth-change', () => {
     const hash = window.location.hash.replace('#', '').trim();
-    if (['cadastro-competicao', 'cadastro-depoimento'].includes(hash)) {
+    if (hash.startsWith('cadastro')) {
       handleRoute();
     }
   });

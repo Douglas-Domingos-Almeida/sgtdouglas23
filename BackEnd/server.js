@@ -4,16 +4,22 @@ const path = require('node:path');
 const { promisify } = require('node:util');
 const express = require('express');
 const jsonServer = require('json-server');
+const { isVisibleNews, publicNews } = require('./public-news');
+const { AuthStore } = require('./auth-store');
 
 const scrypt = promisify(crypto.scrypt);
 const scryptCost = 32768;
 const scryptOptions = { N: scryptCost, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
 const server = jsonServer.create();
-const { loadAdminConfig } = require('./admin-config');
+const { getAdminConfigPath, loadAdminConfig } = require('./admin-config');
 const adminConfig = loadAdminConfig();
 const databasePath = process.env.DB_PATH
   ? path.resolve(process.env.DB_PATH)
   : path.join(__dirname, 'db.json');
+const authDatabasePath = process.env.UCA_AUTH_DB_PATH
+  ? path.resolve(process.env.UCA_AUTH_DB_PATH)
+  : path.join(path.dirname(getAdminConfigPath()), 'users.sqlite');
+const authStore = new AuthStore(authDatabasePath, adminConfig);
 const router = jsonServer.router(databasePath);
 const validCategories = new Set([
   'Notícias da UCA Master',
@@ -35,6 +41,13 @@ const maximumLoginAttempts = 5;
 const sessions = new Map();
 const loginAttempts = new Map();
 const validAdminHash = /^scrypt\$([a-f0-9]{32})\$([a-f0-9]{128})$/;
+const dummySalt = crypto.randomBytes(16);
+const dummyPasswordHash = `scrypt$${dummySalt.toString('hex')}$${crypto.scryptSync(
+  crypto.randomBytes(32),
+  dummySalt,
+  64,
+  scryptOptions
+).toString('hex')}`;
 
 function requiredOrigin(value, variableName) {
   if (!value) throw new Error(`${variableName} deve ser configurada.`);
@@ -167,6 +180,48 @@ function safeEqual(left, right) {
   return left.length === right.length && crypto.timingSafeEqual(left, right);
 }
 
+function validUsername(username) {
+  return typeof username === 'string'
+    && username.trim().length > 0
+    && username.trim().length <= 100
+    && !/[\u0000-\u001f\u007f]/.test(username);
+}
+
+function validPasswordHash(passwordHash) {
+  return typeof passwordHash === 'string' && validAdminHash.test(passwordHash);
+}
+
+async function verifyPassword(password, passwordHash) {
+  const hashParts = passwordHash.match(validAdminHash);
+  if (!hashParts) return false;
+  const [, saltHex, hashHex] = hashParts;
+  const candidate = Buffer.from(await scrypt(password, Buffer.from(saltHex, 'hex'), 64, scryptOptions));
+  return safeEqual(candidate, Buffer.from(hashHex, 'hex'));
+}
+
+async function createPasswordHash(password) {
+  const salt = crypto.randomBytes(16);
+  const hash = Buffer.from(await scrypt(password, salt, 64, scryptOptions));
+  return `scrypt$${salt.toString('hex')}$${hash.toString('hex')}`;
+}
+
+function isValidCsrfRequest(request, session) {
+  return isAdminOrigin(request)
+    && safeEqual(Buffer.from(request.headers['x-csrf-token'] || ''), Buffer.from(session.csrfToken));
+}
+
+function invalidateUserSessions(username) {
+  for (const [tokenHash, activeSession] of sessions) {
+    if (activeSession.username.toLocaleLowerCase('en-US') === username.toLocaleLowerCase('en-US')) {
+      sessions.delete(tokenHash);
+    }
+  }
+}
+
+function publicUser(user) {
+  return { username: user.username, role: user.role, createdAt: user.createdAt };
+}
+
 function isAdminOrigin(request) {
   return request.headers.origin === appOrigin;
 }
@@ -179,22 +234,6 @@ function setCorsHeaders(request, response) {
     response.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS');
     response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, X-CSRF-Token');
   }
-}
-
-function isVisibleNews(item) {
-  if (item.status === 'published') return true;
-  if (item.status !== 'scheduled' || !isValidIsoDate(item.publishedAt)) return false;
-  return item.publishedAt <= new Date().toISOString().slice(0, 10);
-}
-
-function publicNews(item) {
-  const publicFields = [
-    'id', 'slug', 'title', 'content', 'category', 'publishedAt', 'status',
-    'excerpt', 'author', 'coverImage', 'imageAlt', 'imageCaption', 'imageCredit'
-  ];
-  return Object.fromEntries(publicFields
-    .filter((field) => Object.hasOwn(item, field))
-    .map((field) => [field, item[field]]));
 }
 
 function getLoginThrottle(request) {
@@ -242,7 +281,12 @@ server.use(async (request, response, next) => {
     const session = getSession(request);
     response.setHeader('Cache-Control', 'no-store');
     response.json(session
-      ? { authenticated: true, role: session.role, csrfToken: session.csrfToken }
+      ? {
+        authenticated: true,
+        username: session.username,
+        role: session.role,
+        csrfToken: session.csrfToken
+      }
       : { authenticated: false });
     return;
   }
@@ -261,24 +305,23 @@ server.use(async (request, response, next) => {
     const password = typeof request.body?.password === 'string' ? request.body.password : '';
     if (username.length > 100 || password.length > 1024) {
       throttle.count += 1;
-      response.status(401).json({ message: 'Usuário ou senha inválidos.' });
+      response.status(401).json({ message: 'Usuário ou senha incorretos.' });
       return;
     }
 
-    const [, saltHex, hashHex] = adminHash.match(validAdminHash);
-    let candidate;
+    const user = authStore.getUser(username);
     try {
-      candidate = Buffer.from(await scrypt(password, Buffer.from(saltHex, 'hex'), 64, scryptOptions));
+      const passwordMatches = await verifyPassword(
+        password,
+        user && validPasswordHash(user.passwordHash) ? user.passwordHash : dummyPasswordHash
+      );
+      if (!user || !passwordMatches) {
+        throttle.count += 1;
+        response.status(401).json({ message: 'Usuário ou senha incorretos.' });
+        return;
+      }
     } catch (error) {
       next(error);
-      return;
-    }
-    const configuredHash = Buffer.from(hashHex, 'hex');
-    const usernameMatches = safeEqual(Buffer.from(username), Buffer.from(adminUsername));
-    const passwordMatches = safeEqual(candidate, configuredHash);
-    if (!usernameMatches || !passwordMatches) {
-      throttle.count += 1;
-      response.status(401).json({ message: 'Usuário ou senha inválidos.' });
       return;
     }
 
@@ -294,19 +337,19 @@ server.use(async (request, response, next) => {
     const csrfToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = Date.now() + sessionDurationMs;
     sessions.set(crypto.createHash('sha256').update(token).digest('hex'), {
-      role: 'admin',
+      username: user.username,
+      role: user.role,
       csrfToken,
       expiresAt
     });
     setSessionCookie(response, token, Math.floor(sessionDurationMs / 1000));
     response.setHeader('Cache-Control', 'no-store');
-    response.json({ authenticated: true, role: 'admin', csrfToken });
+    response.json({ authenticated: true, username: user.username, role: user.role, csrfToken });
     return;
   }
   if (request.path === '/auth/logout' && request.method === 'POST') {
     const session = getSession(request);
-    if (!session || !isAdminOrigin(request)
-      || !safeEqual(Buffer.from(request.headers['x-csrf-token'] || ''), Buffer.from(session.csrfToken))) {
+    if (!session || !isValidCsrfRequest(request, session)) {
       response.status(403).json({ message: 'Sessão inválida ou solicitação não autorizada.' });
       return;
     }
@@ -314,6 +357,125 @@ server.use(async (request, response, next) => {
     clearSessionCookie(response);
     response.setHeader('Cache-Control', 'no-store');
     response.status(204).end();
+    return;
+  }
+  if (request.path === '/auth/password' && request.method === 'POST') {
+    const session = getSession(request);
+    if (!session) {
+      response.status(401).json({ message: 'Autenticação necessária.' });
+      return;
+    }
+    if (!isValidCsrfRequest(request, session)) {
+      response.status(403).json({ message: 'Solicitação não autorizada.' });
+      return;
+    }
+    const currentPassword = typeof request.body?.currentPassword === 'string'
+      ? request.body.currentPassword
+      : '';
+    const newPassword = typeof request.body?.newPassword === 'string'
+      ? request.body.newPassword
+      : '';
+    const user = authStore.getUser(session.username);
+    let currentPasswordMatches = false;
+    try {
+      currentPasswordMatches = Boolean(
+        user && currentPassword.length <= 1024
+        && await verifyPassword(currentPassword, user.passwordHash)
+      );
+    } catch (error) {
+      next(error);
+      return;
+    }
+    if (!currentPasswordMatches) {
+      response.status(401).json({ message: 'A senha atual está incorreta.' });
+      return;
+    }
+    if (newPassword.length < 16 || newPassword.length > 1024) {
+      response.status(400).json({ message: 'A nova senha deve ter entre 16 e 1024 caracteres.' });
+      return;
+    }
+    try {
+      const passwordHash = await createPasswordHash(newPassword);
+      authStore.updatePassword(user.username, passwordHash);
+    } catch (error) {
+      next(error);
+      return;
+    }
+    invalidateUserSessions(user.username);
+    clearSessionCookie(response);
+    response.setHeader('Cache-Control', 'no-store');
+    response.status(204).end();
+    return;
+  }
+  if (request.path === '/auth/users' || /^\/auth\/users\/[^/]+$/.test(request.path)) {
+    const session = getSession(request);
+    if (!session) {
+      response.status(401).json({ message: 'Autenticação necessária.' });
+      return;
+    }
+    if (session.role !== 'admin') {
+      response.status(403).json({ message: 'Somente administradores podem gerenciar usuários.' });
+      return;
+    }
+    if (request.method === 'GET' && request.path === '/auth/users') {
+      response.setHeader('Cache-Control', 'no-store');
+      response.json(authStore.listUsers());
+      return;
+    }
+    if (['POST', 'DELETE'].includes(request.method) && !isValidCsrfRequest(request, session)) {
+      response.status(403).json({ message: 'Solicitação não autorizada.' });
+      return;
+    }
+    if (request.method === 'POST' && request.path === '/auth/users') {
+      const { username, password, role } = request.body || {};
+      if (!validUsername(username) || !['admin', 'member'].includes(role)
+        || typeof password !== 'string' || password.length < 16 || password.length > 1024) {
+        response.status(400).json({
+          message: 'Informe usuário válido, perfil Administrador ou Membro e senha com 16 a 1024 caracteres.'
+        });
+        return;
+      }
+      try {
+        const passwordHash = await createPasswordHash(password);
+        const createdUser = authStore.createUser(username.trim(), role, passwordHash);
+        response.status(201).json(publicUser(createdUser));
+      } catch (error) {
+        if (error.code === 'SQLITE_CONSTRAINT_PRIMARYKEY' || error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+          response.status(409).json({ message: 'Já existe um usuário com esse nome.' });
+          return;
+        }
+        next(error);
+      }
+      return;
+    }
+    const userMatch = request.path.match(/^\/auth\/users\/([^/]+)$/);
+    if (request.method === 'DELETE' && userMatch) {
+      let username;
+      try {
+        username = decodeURIComponent(userMatch[1]);
+      } catch {
+        response.status(400).json({ message: 'O nome do usuário não é válido.' });
+        return;
+      }
+      const user = authStore.getUser(username);
+      if (!user) {
+        response.status(404).json({ message: 'Usuário não encontrado.' });
+        return;
+      }
+      if (user.username.toLocaleLowerCase('en-US') === session.username.toLocaleLowerCase('en-US')) {
+        response.status(409).json({ message: 'Não é possível excluir a própria conta.' });
+        return;
+      }
+      if (user.role === 'admin' && authStore.countAdmins() <= 1) {
+        response.status(409).json({ message: 'O sistema precisa manter pelo menos um administrador.' });
+        return;
+      }
+      authStore.deleteUser(user.username);
+      invalidateUserSessions(user.username);
+      response.status(204).end();
+      return;
+    }
+    response.status(405).json({ message: 'Método não permitido.' });
     return;
   }
   next();
@@ -326,13 +488,12 @@ server.use((request, response, next) => {
     return;
   }
   const session = getSession(request);
-  if (!session || session.role !== 'admin') {
-    response.status(401).json({ message: 'Autenticação administrativa necessária.' });
+  if (!session || !['admin', 'member'].includes(session.role)) {
+    response.status(401).json({ message: 'Autenticação necessária.' });
     return;
   }
-  if (!isAdminOrigin(request)
-    || !safeEqual(Buffer.from(request.headers['x-csrf-token'] || ''), Buffer.from(session.csrfToken))) {
-    response.status(403).json({ message: 'Solicitação administrativa não autorizada.' });
+  if (!isValidCsrfRequest(request, session)) {
+    response.status(403).json({ message: 'Solicitação não autorizada.' });
     return;
   }
   next();
@@ -342,7 +503,7 @@ server.use((request, response, next) => {
   if (request.method === 'GET' && /^\/noticias\/?$/.test(request.path)) {
     const items = router.db.get('noticias').value() || [];
     response.setHeader('Cache-Control', 'no-store');
-    response.json(items.filter(isVisibleNews).map(publicNews));
+    response.json(items.filter((item) => isVisibleNews(item)).map(publicNews));
     return;
   }
   const newsId = request.method === 'GET' ? request.path.match(/^\/noticias\/([^/]+)$/) : null;
