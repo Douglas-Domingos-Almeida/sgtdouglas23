@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="uca-api-base" content="http://127.0.0.1:3000">
   <title>Projeto UCA</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23c8102e%22/%3E%3Ctext x=%2232%22 y=%2242%22 text-anchor=%22middle%22 font-family=%22Arial,sans-serif%22 font-size=%2224%22 font-weight=%22700%22 fill=%22white%22%3EUCA%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/style-modern.css?v=20261110-uca-header-r8">
 </head>
 <body>
@@ -18,7 +19,6 @@
       document.getElementById('localServerNotice').hidden = false;
     }
   </script>
-  <!-- Classes do topo: site-header controla a barra; site-header__navigation e button--header recebem o contraste escuro. -->
   <header class="site-header site-header--home">
     <div class="site-header__art">
       <img class="site-header__art-image" src="imagens/Cabe%C3%A7alho%20UCA(1).png?v=f960bb4dc618" alt="Cabeçalho da UCA Master: UNIÃO CATARINENSE DE ATLETISMO, quatro atletas na pista e efeitos luminosos.">
@@ -32,19 +32,24 @@
 
       <nav class="site-header__navigation" id="main-navigation" aria-label="Navegação principal">
         <div class="site-header__submenu">
-          <button class="site-header__link site-header__submenu-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="results-submenu">
-            Resultado
+          <a href="#resultado-ranking" class="site-header__link">
+            <svg class="site-header__link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h17M6 17v-5h3v5m3 0V7h3v10m3 0V3h3v14" fill="currentColor"/></svg>
+            Resultados
+          </a>
+          <button class="site-header__submenu-toggle" type="button" aria-label="Outras opções de resultados" aria-haspopup="true" aria-expanded="false" aria-controls="results-submenu">
             <span class="site-header__submenu-chevron" aria-hidden="true">&#9662;</span>
           </button>
           <div class="site-header__submenu-panel" id="results-submenu" hidden>
-            <a class="site-header__submenu-link" href="#resultado-ranking">Ranking</a>
             <a class="site-header__submenu-link" href="#resultado-historico">Histórico</a>
             <a class="site-header__submenu-link" href="#resultado-complemento">Complemento</a>
           </div>
         </div>
-        <div class="site-header__submenu" data-registration-access hidden>
-          <button class="site-header__link site-header__submenu-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="register-submenu">
+        <div class="site-header__submenu">
+          <a href="#cadastro" class="site-header__link" data-route="cadastro">
+            <svg class="site-header__link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.75h8l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.75a1 1 0 0 1 1-1Zm7 1v4h4m-9 4h6m-6 3h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Cadastro
+          </a>
+          <button class="site-header__submenu-toggle" type="button" data-registration-access hidden aria-label="Outras opções de cadastro" aria-haspopup="true" aria-expanded="false" aria-controls="register-submenu">
             <span class="site-header__submenu-chevron" aria-hidden="true">&#9662;</span>
           </button>
           <div class="site-header__submenu-panel" id="register-submenu" hidden>
@@ -53,8 +58,18 @@
             <a class="site-header__submenu-link" href="#cadastro-depoimento" data-route="cadastro-depoimento">Depoimento</a>
           </div>
         </div>
-        <a href="#atualizacoes" class="site-header__link">Sobre Nós</a>
-        <a href="#cadastro" class="site-header__link" data-route="cadastro" data-registration-access hidden>Calendário</a>
+        <a href="#quem-somos" class="site-header__link">
+          <svg class="site-header__link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.5V20m6-9a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm7-6.5a3.5 3.5 0 0 1 0 6.8m1 3.7a3.5 3.5 0 0 1 2 3.2V20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Sobre Nós
+        </a>
+        <a href="#proximos-eventos" class="site-header__link">
+          <svg class="site-header__link-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7.5 3v4m8-4v4M4 9.5h16M7 13h3m-3 4h3m4-4h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Calendário
+        </a>
+        <button class="site-header__link admin-auth__toggle" type="button" data-admin-auth-toggle>
+          <svg class="site-header__link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3m-11 0h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Zm5 4v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span data-auth-toggle-label>Acesso UCA</span>
+        </button>
       </nav>
 
       <button class="site-header__search-toggle" type="button" aria-label="Pesquisar" aria-expanded="false" aria-controls="site-search">
@@ -63,7 +78,10 @@
           <path d="M15.5 15.5 21 21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
         </svg>
       </button>
-      <button class="button--header button admin-auth__toggle" type="button" data-admin-auth-toggle>Acesso UCA</button>
+      <a class="button--header button site-header__join" href="#cadastro" data-route="cadastro">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11a3 3 0 1 0-2.8-4M8 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm-6 8v-1.5A4.5 4.5 0 0 1 6.5 14h3A4.5 4.5 0 0 1 14 18.5V20m2-6a4.5 4.5 0 0 1 6 4.2V20" fill="currentColor"/><path d="m18 8 3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Junte-se a Nós</span>
+      </a>
     </div>
     <form class="site-search" id="site-search" role="search" aria-label="Pesquisar no site" hidden>
       <input class="site-search__input" id="site-search-input" name="q" type="search" placeholder="Pesquisar no site..." aria-label="Pesquisar no site" autocomplete="off">
@@ -74,7 +92,8 @@
         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
       </button>
       <p class="site-search__status" role="status" hidden></p>
-    </form>  </header>
+    </form>
+  </header>
     <dialog class="admin-auth-dialog" id="adminAuthDialog" aria-labelledby="adminAuthTitle">
       <form class="admin-auth-dialog__form" id="adminAuthForm">
         <h2 id="adminAuthTitle">Acesso UCA<br>Administrador / Membros</h2>
@@ -108,10 +127,10 @@
     </dialog>
 
     <script src="js/text-utils.js?v=20261021-dry-refactor"></script>
-    <script src="js/main.js?v=20261109-rbac"></script>
+    <script src="js/main.js?v=20261110-uca-header-r2"></script>
     <script src="js/news-data.js?v=20261014-file-support" charset="utf-8" defer></script>
     <script src="js/news.js?v=20261024-news-badges" defer></script>
-    <script type="module" src="js/admin-auth.js?v=20261109-rbac"></script>
+    <script type="module" src="js/admin-auth.js?v=20261110-uca-header-r2"></script>
     <script type="module" src="js/competitions.js?v=20261026-competitions-v3"></script>
 
   <section class="testimonial-registration page__view page__view--hidden page" data-view="cadastro-depoimento" aria-hidden="true" inert>

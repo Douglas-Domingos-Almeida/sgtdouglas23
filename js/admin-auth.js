@@ -32,7 +32,12 @@
 
   function updateInterface() {
     if (toggle) {
-      toggle.textContent = session.authenticated ? 'Minha conta' : 'Acesso UCA';
+      const label = toggle.querySelector('[data-auth-toggle-label]');
+      if (label) {
+        label.textContent = session.authenticated ? 'Minha conta' : 'Acesso UCA';
+      } else {
+        toggle.textContent = session.authenticated ? 'Minha conta' : 'Acesso UCA';
+      }
       toggle.setAttribute('aria-label', session.authenticated
         ? 'Abrir opções da conta'
         : 'Acesso UCA para membros');

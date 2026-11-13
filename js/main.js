@@ -1098,7 +1098,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.querySelectorAll('.site-header__link').forEach((link) => {
-    link.addEventListener('click', () => link.classList.add('site-header__link--clicked'));
+    link.addEventListener('click', () => {
+      link.classList.add('site-header__link--clicked');
+      if (link instanceof HTMLAnchorElement && window.closeMainNavigation) {
+        window.closeMainNavigation();
+      }
+    });
     link.addEventListener('mouseleave', () => link.classList.remove('site-header__link--clicked'));
   });
 
@@ -1678,13 +1683,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ]);
 
     if (registrationRoutes.has(hash)) {
-      showView(hash);
       if (!window.UcaAdminAuth) {
+        showView('home');
         return;
       }
-      window.UcaAdminAuth.requireRegistration(hash).then(() => {
+      window.UcaAdminAuth.requireRegistration(hash).then((authorized) => {
         if (window.location.hash.replace('#', '').trim() === hash) {
-          showView(hash);
+          showView(authorized ? hash : 'home');
         }
       });
       return;
