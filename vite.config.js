@@ -1,8 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import { createPublicSnapshot } from './scripts/public-snapshot.js';
+
+const require = createRequire(import.meta.url);
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const scripts = ['text-utils.js', 'main.js', 'news.js', 'admin-auth.js', 'competitions.js'];
@@ -10,6 +13,16 @@ const scripts = ['text-utils.js', 'main.js', 'news.js', 'admin-auth.js', 'compet
 export default defineConfig(({ mode }) => {
   const snapshot = mode === 'public-snapshot';
   return {
+    server: {
+      fs: {
+        deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '**/Associados_ABRAM_SC.ods']
+      },
+      watch: {
+        // Planilhas e arquivos temporários do Office/LibreOffice ficam bloqueados
+        // enquanto abertos e derrubam o watcher no Windows (EBUSY).
+        ignored: ['**/*.ods', '**/*.xlsx', '**/*.docx', '**/~$*', '**/.~lock.*']
+      }
+    },
     plugins: [{
       name: 'uca-public-assets',
       apply: 'build',
@@ -24,7 +37,7 @@ export default defineConfig(({ mode }) => {
             .replace('</head>', '<meta name="uca-public-data" content="/dados/">\n</head>');
         }
       },
-      generateBundle() {
+      async generateBundle() {
         const emitFile = (relativePath) => this.emitFile({
           type: 'asset',
           fileName: relativePath.split(path.sep).join('/'),
@@ -44,11 +57,24 @@ export default defineConfig(({ mode }) => {
           copyDirectory(directory);
         }
         if (snapshot) {
-          const database = JSON.parse(fs.readFileSync(path.join(root, 'BackEnd', 'db.json'), 'utf8'));
-          for (const [collection, records] of Object.entries(createPublicSnapshot(database))) {
-            this.emitFile({
-              type: 'asset', fileName: `dados/${collection}.json`, source: JSON.stringify(records)
-            });
+          // O conteúdo publicado vem do MySQL; db.json permanece apenas como fonte da migração inicial.
+          const { MysqlStore } = require('./BackEnd/mysql-store.js');
+          const { loadMysqlConfig } = require('./BackEnd/mysql-config.js');
+          const store = new MysqlStore(loadMysqlConfig());
+          try {
+            await store.initialize(path.join(root, 'BackEnd', 'db.json'));
+            const database = {
+              depoimentos: await store.list('depoimentos'),
+              noticias: await store.list('noticias'),
+              competicoes: await store.list('competicoes')
+            };
+            for (const [collection, records] of Object.entries(createPublicSnapshot(database))) {
+              this.emitFile({
+                type: 'asset', fileName: `dados/${collection}.json`, source: JSON.stringify(records)
+              });
+            }
+          } finally {
+            await store.close();
           }
         }
       }

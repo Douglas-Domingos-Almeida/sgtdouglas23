@@ -5728,14 +5728,61 @@ body .site-header__submenu-link:focus:not(:focus-visible):not(:hover) {
 .admin-auth-dialog {
   width: min(440px, calc(100% - 32px));
   padding: 0;
-  border: 0;
+  border: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 18px;
   color: var(--navy);
-  box-shadow: 0 20px 60px rgba(15, 47, 86, 0.28);
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.82), rgba(238, 248, 243, 0.68) 55%, rgba(234, 246, 251, 0.72));
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow:
+    0 20px 60px rgba(15, 47, 86, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.admin-auth-dialog[open] {
+  animation: admin-auth-pop 0.35s ease;
 }
 
 .admin-auth-dialog::backdrop {
   background: rgba(8, 27, 48, 0.66);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+@keyframes admin-auth-pop {
+  from {
+    transform: scale(0.94);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes admin-auth-flip-in {
+  from {
+    transform: perspective(900px) rotateY(-65deg);
+    opacity: 0;
+  }
+  to {
+    transform: perspective(900px) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+.admin-auth-dialog__form:not([hidden]) {
+  animation: admin-auth-flip-in 0.5s ease;
+  transform-origin: center;
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-auth-dialog[open],
+  .admin-auth-dialog__form:not([hidden]) {
+    animation: none;
+  }
 }
 
 .admin-auth-dialog__form {
@@ -5786,9 +5833,14 @@ body .site-header__submenu-link:focus:not(:focus-visible):not(:hover) {
   width: 100%;
   min-height: 46px;
   padding: 10px 12px;
-  border: 1px solid #aab6c4;
-  border-radius: 8px;
+  border: 1px solid rgba(23, 63, 55, 0.28);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.66);
   font: inherit;
+}
+
+.admin-auth-dialog__form input:focus {
+  background: rgba(255, 255, 255, 0.92);
 }
 
 .admin-auth-dialog__form select,
@@ -5802,15 +5854,48 @@ body .site-header__submenu-link:focus:not(:focus-visible):not(:hover) {
   font: inherit;
 }
 
+.admin-auth-dialog__password-wrap {
+  position: relative;
+}
+
+.admin-auth-dialog__password-wrap input {
+  padding-right: 46px;
+}
+
 .admin-auth-dialog__password-toggle {
-  justify-self: start;
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   padding: 0;
   border: 0;
+  border-radius: 8px;
   background: transparent;
   color: var(--navy);
-  font: inherit;
-  text-decoration: underline;
   cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.admin-auth-dialog__password-toggle:hover {
+  background: rgba(23, 63, 55, 0.08);
+}
+
+.admin-auth-dialog__password-slash {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.admin-auth-dialog__password-toggle--visible .admin-auth-dialog__password-slash {
+  opacity: 1;
+}
+
+.admin-auth-dialog__actions .button--primary {
+  border: 0;
+  background: linear-gradient(120deg, var(--green), var(--blue));
 }
 
 .admin-auth-dialog__status {

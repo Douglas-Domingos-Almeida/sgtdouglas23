@@ -14,6 +14,8 @@ const {
   validateAdminConfig,
   writeAdminConfig
 } = require('../admin-config');
+const { MysqlStore } = require('../mysql-store');
+const { loadMysqlConfig } = require('../mysql-config');
 
 const validConfig = {
   username: 'uca-test-admin',
@@ -98,6 +100,7 @@ test('API inicializa e autentica usando a configuração administrativa local se
   const username = `uca-file-${crypto.randomBytes(6).toString('hex')}`;
   const password = crypto.randomBytes(32).toString('hex');
   const salt = crypto.randomBytes(16);
+  const tablePrefix = `test_cfg_${crypto.randomBytes(4).toString('hex')}_`;
   const hash = crypto.scryptSync(password, salt, 64, {
     N: 32768,
     r: 8,
@@ -126,6 +129,7 @@ test('API inicializa e autentica usando a configuração administrativa local se
       AUTH_COOKIE_SECURE: 'false',
       DB_PATH: localDatabasePath,
       UCA_ADMIN_CONFIG_FILE: localConfigPath,
+      MYSQL_TABLE_PREFIX: tablePrefix,
       NODE_ENV: 'test',
       PORT: String(port)
     },
@@ -154,6 +158,14 @@ test('API inicializa e autentica usando a configuração administrativa local se
     if (child.exitCode === null) {
       child.kill();
       await once(child, 'exit');
+    }
+    const cleanupStore = new MysqlStore(loadMysqlConfig({ ...process.env, MYSQL_TABLE_PREFIX: tablePrefix }));
+    try {
+      await cleanupStore.dropTables();
+    } catch (error) {
+      console.error('Não foi possível remover as tabelas de teste do MySQL.', error);
+    } finally {
+      await cleanupStore.close();
     }
   }
 });

@@ -1,13 +1,9 @@
-import { fork, spawn, spawnSync } from 'node:child_process';
+import { fork, spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import fs from 'node:fs';
-import { createRequire } from 'node:module';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const backendRoot = path.join(root, 'BackEnd');
-const setupScript = path.join(backendRoot, 'scripts', 'setup-admin.js');
-const require = createRequire(import.meta.url);
 const environment = {
   ...process.env,
   APP_ORIGIN: process.env.APP_ORIGIN || 'http://127.0.0.1:5173',
@@ -16,31 +12,6 @@ const environment = {
 };
 let frontend;
 let stopping = false;
-
-if (!environment.ADMIN_USERNAME && !environment.ADMIN_PASSWORD_HASH) {
-  const { getAdminConfigPath, readAdminConfig } = require('../BackEnd/admin-config.js');
-  const configPath = getAdminConfigPath(environment);
-  if (!readAdminConfig(configPath)) {
-    console.log('O primeiro uso requer uma conta administrativa local. Ela será criada agora; a senha não será exibida.');
-    const setup = spawnSync(process.execPath, [setupScript, '--if-missing'], {
-      cwd: backendRoot,
-      env: environment,
-      stdio: 'inherit'
-    });
-    if (setup.error) {
-      console.error('Falha ao iniciar a configuração administrativa:', setup.error.message);
-      process.exit(1);
-    }
-    if (setup.status !== 0) process.exit(setup.status || 1);
-    if (!fs.existsSync(configPath)) {
-      console.error('A conta administrativa não foi configurada. Inicie o projeto em um terminal interativo.');
-      process.exit(1);
-    }
-  }
-} else if (!environment.ADMIN_USERNAME || !environment.ADMIN_PASSWORD_HASH) {
-  console.error('ADMIN_USERNAME e ADMIN_PASSWORD_HASH devem ser informadas juntas.');
-  process.exit(1);
-}
 
 const backend = fork(path.join(backendRoot, 'server.js'), [], {
   cwd: backendRoot,

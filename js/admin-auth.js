@@ -45,7 +45,7 @@
     document.querySelectorAll('[data-registration-access]').forEach((element) => {
       element.hidden = !session.authenticated;
     });
-    if (userManagement) userManagement.hidden = session.role !== 'admin';
+    if (userManagement) userManagement.hidden = true;
     if (accountUsername) accountUsername.textContent = session.username;
   }
 
@@ -106,7 +106,6 @@
     if (form) form.hidden = true;
     if (accountPanel) accountPanel.hidden = false;
     if (!dialog.open) dialog.showModal();
-    if (session.role === 'admin') await loadUsers();
   }
 
   async function requireRegistration(route) {
@@ -222,7 +221,7 @@
       if (status) status.textContent = readOnlyMessage;
       return;
     }
-    const username = form.elements.namedItem('username').value.trim();
+    const username = form.elements.namedItem('username').value;
     const passwordInput = form.elements.namedItem('password');
     const password = passwordInput.value;
     submit.disabled = true;
@@ -335,12 +334,12 @@
     if (!passwordInput) return;
     const reveal = passwordInput.type === 'password';
     passwordInput.type = reveal ? 'text' : 'password';
-    event.currentTarget.textContent = reveal ? 'Ocultar senha' : 'Mostrar senha';
-    event.currentTarget.setAttribute('aria-pressed', String(reveal));
-  });
-
-  window.addEventListener('uca-admin-auth-change', () => {
-    if (session.role === 'admin') loadUsers();
+    const toggleButton = event.currentTarget;
+    const label = reveal ? 'Ocultar senha' : 'Mostrar senha';
+    toggleButton.classList.toggle('admin-auth-dialog__password-toggle--visible', reveal);
+    toggleButton.setAttribute('aria-label', label);
+    toggleButton.setAttribute('title', label);
+    toggleButton.setAttribute('aria-pressed', String(reveal));
   });
 
   if (publicDataBase) {

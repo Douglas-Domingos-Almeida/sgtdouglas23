@@ -1,26 +1,17 @@
 const crypto = require('node:crypto');
-const fs = require('node:fs');
 const path = require('node:path');
-const { promisify } = require('node:util');
 const express = require('express');
 const jsonServer = require('json-server');
 const { isVisibleNews, publicNews } = require('./public-news');
-const { AuthStore } = require('./auth-store');
+const { MysqlStore } = require('./mysql-store');
+const { loadMysqlConfig } = require('./mysql-config');
+const { authenticateAssociado } = require('./associados-auth');
 
-const scrypt = promisify(crypto.scrypt);
-const scryptCost = 32768;
-const scryptOptions = { N: scryptCost, r: 8, p: 1, maxmem: 64 * 1024 * 1024 };
 const server = jsonServer.create();
-const { getAdminConfigPath, loadAdminConfig } = require('./admin-config');
-const adminConfig = loadAdminConfig();
 const databasePath = process.env.DB_PATH
   ? path.resolve(process.env.DB_PATH)
   : path.join(__dirname, 'db.json');
-const authDatabasePath = process.env.UCA_AUTH_DB_PATH
-  ? path.resolve(process.env.UCA_AUTH_DB_PATH)
-  : path.join(path.dirname(getAdminConfigPath()), 'users.sqlite');
-const authStore = new AuthStore(authDatabasePath, adminConfig);
-const router = jsonServer.router(databasePath);
+const dataStore = new MysqlStore(loadMysqlConfig());
 const validCategories = new Set([
   'Notícias da UCA Master',
   'Competições',
@@ -40,14 +31,6 @@ const loginWindowMs = 15 * 60 * 1000;
 const maximumLoginAttempts = 5;
 const sessions = new Map();
 const loginAttempts = new Map();
-const validAdminHash = /^scrypt\$([a-f0-9]{32})\$([a-f0-9]{128})$/;
-const dummySalt = crypto.randomBytes(16);
-const dummyPasswordHash = `scrypt$${dummySalt.toString('hex')}$${crypto.scryptSync(
-  crypto.randomBytes(32),
-  dummySalt,
-  64,
-  scryptOptions
-).toString('hex')}`;
 
 function requiredOrigin(value, variableName) {
   if (!value) throw new Error(`${variableName} deve ser configurada.`);
@@ -63,16 +46,11 @@ function requiredOrigin(value, variableName) {
   return parsed.origin;
 }
 
-const adminUsername = adminConfig.username;
-const adminHash = adminConfig.passwordHash;
 const appOrigin = requiredOrigin(process.env.APP_ORIGIN || 'http://127.0.0.1:5173', 'APP_ORIGIN');
 const cookieSecure = process.env.AUTH_COOKIE_SECURE === 'true';
 
 if (process.env.NODE_ENV === 'production' && !cookieSecure) {
   throw new Error('AUTH_COOKIE_SECURE=true é obrigatório em produção, com HTTPS configurado.');
-}
-if (!fs.existsSync(databasePath)) {
-  throw new Error(`O arquivo de persistência não existe: ${databasePath}`);
 }
 
 function normalizeTitle(title) {
@@ -180,46 +158,9 @@ function safeEqual(left, right) {
   return left.length === right.length && crypto.timingSafeEqual(left, right);
 }
 
-function validUsername(username) {
-  return typeof username === 'string'
-    && username.trim().length > 0
-    && username.trim().length <= 100
-    && !/[\u0000-\u001f\u007f]/.test(username);
-}
-
-function validPasswordHash(passwordHash) {
-  return typeof passwordHash === 'string' && validAdminHash.test(passwordHash);
-}
-
-async function verifyPassword(password, passwordHash) {
-  const hashParts = passwordHash.match(validAdminHash);
-  if (!hashParts) return false;
-  const [, saltHex, hashHex] = hashParts;
-  const candidate = Buffer.from(await scrypt(password, Buffer.from(saltHex, 'hex'), 64, scryptOptions));
-  return safeEqual(candidate, Buffer.from(hashHex, 'hex'));
-}
-
-async function createPasswordHash(password) {
-  const salt = crypto.randomBytes(16);
-  const hash = Buffer.from(await scrypt(password, salt, 64, scryptOptions));
-  return `scrypt$${salt.toString('hex')}$${hash.toString('hex')}`;
-}
-
 function isValidCsrfRequest(request, session) {
   return isAdminOrigin(request)
     && safeEqual(Buffer.from(request.headers['x-csrf-token'] || ''), Buffer.from(session.csrfToken));
-}
-
-function invalidateUserSessions(username) {
-  for (const [tokenHash, activeSession] of sessions) {
-    if (activeSession.username.toLocaleLowerCase('en-US') === username.toLocaleLowerCase('en-US')) {
-      sessions.delete(tokenHash);
-    }
-  }
-}
-
-function publicUser(user) {
-  return { username: user.username, role: user.role, createdAt: user.createdAt };
 }
 
 function isAdminOrigin(request) {
@@ -309,13 +250,10 @@ server.use(async (request, response, next) => {
       return;
     }
 
-    const user = authStore.getUser(username);
+    let user;
     try {
-      const passwordMatches = await verifyPassword(
-        password,
-        user && validPasswordHash(user.passwordHash) ? user.passwordHash : dummyPasswordHash
-      );
-      if (!user || !passwordMatches) {
+      user = await authenticateAssociado(dataStore.pool, username, password);
+      if (!user) {
         throttle.count += 1;
         response.status(401).json({ message: 'Usuário ou senha incorretos.' });
         return;
@@ -359,123 +297,9 @@ server.use(async (request, response, next) => {
     response.status(204).end();
     return;
   }
-  if (request.path === '/auth/password' && request.method === 'POST') {
-    const session = getSession(request);
-    if (!session) {
-      response.status(401).json({ message: 'Autenticação necessária.' });
-      return;
-    }
-    if (!isValidCsrfRequest(request, session)) {
-      response.status(403).json({ message: 'Solicitação não autorizada.' });
-      return;
-    }
-    const currentPassword = typeof request.body?.currentPassword === 'string'
-      ? request.body.currentPassword
-      : '';
-    const newPassword = typeof request.body?.newPassword === 'string'
-      ? request.body.newPassword
-      : '';
-    const user = authStore.getUser(session.username);
-    let currentPasswordMatches = false;
-    try {
-      currentPasswordMatches = Boolean(
-        user && currentPassword.length <= 1024
-        && await verifyPassword(currentPassword, user.passwordHash)
-      );
-    } catch (error) {
-      next(error);
-      return;
-    }
-    if (!currentPasswordMatches) {
-      response.status(401).json({ message: 'A senha atual está incorreta.' });
-      return;
-    }
-    if (newPassword.length < 16 || newPassword.length > 1024) {
-      response.status(400).json({ message: 'A nova senha deve ter entre 16 e 1024 caracteres.' });
-      return;
-    }
-    try {
-      const passwordHash = await createPasswordHash(newPassword);
-      authStore.updatePassword(user.username, passwordHash);
-    } catch (error) {
-      next(error);
-      return;
-    }
-    invalidateUserSessions(user.username);
-    clearSessionCookie(response);
-    response.setHeader('Cache-Control', 'no-store');
-    response.status(204).end();
-    return;
-  }
-  if (request.path === '/auth/users' || /^\/auth\/users\/[^/]+$/.test(request.path)) {
-    const session = getSession(request);
-    if (!session) {
-      response.status(401).json({ message: 'Autenticação necessária.' });
-      return;
-    }
-    if (session.role !== 'admin') {
-      response.status(403).json({ message: 'Somente administradores podem gerenciar usuários.' });
-      return;
-    }
-    if (request.method === 'GET' && request.path === '/auth/users') {
-      response.setHeader('Cache-Control', 'no-store');
-      response.json(authStore.listUsers());
-      return;
-    }
-    if (['POST', 'DELETE'].includes(request.method) && !isValidCsrfRequest(request, session)) {
-      response.status(403).json({ message: 'Solicitação não autorizada.' });
-      return;
-    }
-    if (request.method === 'POST' && request.path === '/auth/users') {
-      const { username, password, role } = request.body || {};
-      if (!validUsername(username) || !['admin', 'member'].includes(role)
-        || typeof password !== 'string' || password.length < 16 || password.length > 1024) {
-        response.status(400).json({
-          message: 'Informe usuário válido, perfil Administrador ou Membro e senha com 16 a 1024 caracteres.'
-        });
-        return;
-      }
-      try {
-        const passwordHash = await createPasswordHash(password);
-        const createdUser = authStore.createUser(username.trim(), role, passwordHash);
-        response.status(201).json(publicUser(createdUser));
-      } catch (error) {
-        if (error.code === 'SQLITE_CONSTRAINT_PRIMARYKEY' || error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-          response.status(409).json({ message: 'Já existe um usuário com esse nome.' });
-          return;
-        }
-        next(error);
-      }
-      return;
-    }
-    const userMatch = request.path.match(/^\/auth\/users\/([^/]+)$/);
-    if (request.method === 'DELETE' && userMatch) {
-      let username;
-      try {
-        username = decodeURIComponent(userMatch[1]);
-      } catch {
-        response.status(400).json({ message: 'O nome do usuário não é válido.' });
-        return;
-      }
-      const user = authStore.getUser(username);
-      if (!user) {
-        response.status(404).json({ message: 'Usuário não encontrado.' });
-        return;
-      }
-      if (user.username.toLocaleLowerCase('en-US') === session.username.toLocaleLowerCase('en-US')) {
-        response.status(409).json({ message: 'Não é possível excluir a própria conta.' });
-        return;
-      }
-      if (user.role === 'admin' && authStore.countAdmins() <= 1) {
-        response.status(409).json({ message: 'O sistema precisa manter pelo menos um administrador.' });
-        return;
-      }
-      authStore.deleteUser(user.username);
-      invalidateUserSessions(user.username);
-      response.status(204).end();
-      return;
-    }
-    response.status(405).json({ message: 'Método não permitido.' });
+  if (request.path === '/auth/password' || request.path === '/auth/users'
+    || /^\/auth\/users\/[^/]+$/.test(request.path)) {
+    response.status(410).json({ message: 'As contas são administradas pela planilha de associados.' });
     return;
   }
   next();
@@ -499,29 +323,37 @@ server.use((request, response, next) => {
   next();
 });
 
-server.use((request, response, next) => {
+server.use(async (request, response, next) => {
   if (request.method === 'GET' && /^\/noticias\/?$/.test(request.path)) {
-    const items = router.db.get('noticias').value() || [];
-    response.setHeader('Cache-Control', 'no-store');
-    response.json(items.filter((item) => isVisibleNews(item)).map(publicNews));
+    try {
+      const items = await dataStore.list('noticias');
+      response.setHeader('Cache-Control', 'no-store');
+      response.json(items.filter((item) => isVisibleNews(item)).map(publicNews));
+    } catch (error) {
+      next(error);
+    }
     return;
   }
   const newsId = request.method === 'GET' ? request.path.match(/^\/noticias\/([^/]+)$/) : null;
   if (newsId) {
-    const item = (router.db.get('noticias').value() || [])
-      .find((article) => String(article.id) === decodeURIComponent(newsId[1]));
-    if (!item || !isVisibleNews(item)) {
-      response.status(404).json({ message: 'Notícia não encontrada.' });
-      return;
+    try {
+      const item = (await dataStore.list('noticias'))
+        .find((article) => String(article.id) === decodeURIComponent(newsId[1]));
+      if (!item || !isVisibleNews(item)) {
+        response.status(404).json({ message: 'Notícia não encontrada.' });
+        return;
+      }
+      response.setHeader('Cache-Control', 'no-store');
+      response.json(publicNews(item));
+    } catch (error) {
+      next(error);
     }
-    response.setHeader('Cache-Control', 'no-store');
-    response.json(publicNews(item));
     return;
   }
   next();
 });
 
-server.use((request, response, next) => {
+server.use(async (request, response, next) => {
   if (request.method !== 'POST' || request.path !== '/noticias') {
     next();
     return;
@@ -549,7 +381,13 @@ server.use((request, response, next) => {
     return;
   }
 
-  const existingArticles = router.db.get('noticias').value() || [];
+  let existingArticles;
+  try {
+    existingArticles = await dataStore.list('noticias');
+  } catch (error) {
+    next(error);
+    return;
+  }
   if (existingArticles.some((existing) => existing.id === article.id)) {
     response.status(409).json({ message: 'Esta notícia já foi cadastrada.' });
     return;
@@ -578,7 +416,7 @@ server.use((request, response, next) => {
 
   next();
 });
-server.use((request, response, next) => {
+server.use(async (request, response, next) => {
   const competitionRequest = request.method === 'POST' && request.path === '/competicoes'
     || ['PUT', 'PATCH'].includes(request.method) && /^\/competicoes\/[^/]+$/.test(request.path);
   if (!competitionRequest) {
@@ -586,7 +424,13 @@ server.use((request, response, next) => {
     return;
   }
 
-  const competitions = router.db.get('competicoes').value() || [];
+  let competitions;
+  try {
+    competitions = await dataStore.list('competicoes');
+  } catch (error) {
+    next(error);
+    return;
+  }
   const isCreate = request.method === 'POST';
   const existingId = isCreate ? null : decodeURIComponent(request.path.split('/').pop());
   let competition = request.body;
@@ -630,7 +474,81 @@ server.use((request, response, next) => {
   next();
 });
 
-server.use(router);
+const collectionRoute = /^\/(noticias|competicoes|depoimentos)(?:\/([^/]+))?\/?$/;
+server.use(async (request, response, next) => {
+  const match = request.path.match(collectionRoute);
+  if (!match) {
+    next();
+    return;
+  }
+  const collection = match[1];
+  let id;
+  if (match[2] !== undefined) {
+    try {
+      id = decodeURIComponent(match[2]);
+    } catch {
+      response.status(400).json({ message: 'O identificador informado não é válido.' });
+      return;
+    }
+  }
+  response.setHeader('Cache-Control', 'no-store');
+  try {
+    if (request.method === 'GET' && id === undefined) {
+      response.json(await dataStore.list(collection));
+      return;
+    }
+    if (request.method === 'GET') {
+      const item = await dataStore.get(collection, id);
+      if (!item) {
+        response.status(404).json({ message: 'Recurso não encontrado.' });
+        return;
+      }
+      response.json(item);
+      return;
+    }
+    if (request.method === 'POST' && id === undefined) {
+      if (!request.body || typeof request.body !== 'object' || Array.isArray(request.body)) {
+        response.status(400).json({ message: 'Os dados enviados são inválidos.' });
+        return;
+      }
+      const created = await dataStore.create(collection, request.body);
+      response.status(201).json(created);
+      return;
+    }
+    if (['PUT', 'PATCH'].includes(request.method) && id !== undefined) {
+      if (!request.body || typeof request.body !== 'object' || Array.isArray(request.body)) {
+        response.status(400).json({ message: 'Os dados enviados são inválidos.' });
+        return;
+      }
+      const existing = await dataStore.get(collection, id);
+      if (!existing) {
+        response.status(404).json({ message: 'Recurso não encontrado.' });
+        return;
+      }
+      const record = request.method === 'PATCH'
+        ? { ...existing, ...request.body, id: existing.id }
+        : { ...request.body, id: existing.id };
+      response.json(await dataStore.update(collection, id, record));
+      return;
+    }
+    if (request.method === 'DELETE' && id !== undefined) {
+      const deleted = await dataStore.delete(collection, id);
+      if (!deleted) {
+        response.status(404).json({ message: 'Recurso não encontrado.' });
+        return;
+      }
+      response.json({});
+      return;
+    }
+    response.status(405).json({ message: 'Método não permitido.' });
+  } catch (error) {
+    if (error && error.code === 'ER_DUP_ENTRY') {
+      response.status(409).json({ message: 'Já existe um registro com esse identificador.' });
+      return;
+    }
+    next(error);
+  }
+});
 server.use((error, request, response, next) => {
   if (response.headersSent) {
     next(error);
@@ -648,7 +566,12 @@ server.use((error, request, response, next) => {
 });
 
 const port = Number(process.env.PORT || 3000);
-server.listen(port, '127.0.0.1', () => {
-  console.log(`API de cadastro UCA disponível em http://127.0.0.1:${port}`);
-  if (process.send) process.send('ready');
+dataStore.initialize(databasePath).then(() => {
+  server.listen(port, '127.0.0.1', () => {
+    console.log(`API de cadastro UCA disponível em http://127.0.0.1:${port}`);
+    if (process.send) process.send('ready');
+  });
+}).catch((error) => {
+  console.error('Não foi possível inicializar o banco de dados MySQL.', error);
+  process.exit(1);
 });

@@ -7,9 +7,12 @@ const path = require('node:path');
 const { spawn } = require('node:child_process');
 const { once } = require('node:events');
 const { after, before, test } = require('node:test');
+const { MysqlStore } = require('../mysql-store');
+const { loadMysqlConfig } = require('../mysql-config');
 
 const serverPath = path.join(__dirname, '..', 'server.js');
 const appOrigin = 'http://127.0.0.1:5173';
+const tablePrefix = `test_${crypto.randomBytes(6).toString('hex')}_`;
 const adminUsername = `uca-test-${crypto.randomBytes(6).toString('hex')}`;
 const adminPassword = crypto.randomBytes(32).toString('base64url');
 const adminSalt = crypto.randomBytes(16);
@@ -26,6 +29,7 @@ let databasePath;
 let authDatabasePath;
 let baseUrl;
 let backend;
+let dataStore;
 let sessionCookie = '';
 let csrfToken = '';
 
@@ -118,6 +122,7 @@ before(async () => {
       AUTH_COOKIE_SECURE: 'false',
       DB_PATH: databasePath,
       UCA_AUTH_DB_PATH: authDatabasePath,
+      MYSQL_TABLE_PREFIX: tablePrefix,
       NODE_ENV: 'test',
       PORT: String(port)
     },
@@ -126,6 +131,7 @@ before(async () => {
   let output = '';
   backend.stdout.on('data', (chunk) => { output += chunk.toString(); });
   backend.stderr.on('data', (chunk) => { output += chunk.toString(); });
+  dataStore = new MysqlStore(loadMysqlConfig({ ...process.env, MYSQL_TABLE_PREFIX: tablePrefix }));
   try {
     await waitForServer();
   } catch (error) {
@@ -138,6 +144,14 @@ after(async () => {
   if (backend && backend.exitCode === null) {
     backend.kill();
     await once(backend, 'exit');
+  }
+  if (dataStore) {
+    try {
+      await dataStore.dropTables();
+    } catch (error) {
+      console.error('Não foi possível remover as tabelas de teste do MySQL.', error);
+    }
+    await dataStore.close();
   }
   if (temporaryDirectory) await fs.rm(temporaryDirectory, { recursive: true, force: true });
 });
@@ -374,10 +388,10 @@ test('CRUD de competição autenticado valida a imagem e persiste somente dados 
   assert.equal(list.status, 200);
   assert.equal((await list.json()).length, 1);
 
-  const persisted = JSON.parse(await fs.readFile(databasePath, 'utf8'));
-  assert.equal(persisted.competicoes[0].image, validPng);
-  assert.equal(persisted.competicoes[0].expectedDate, competition.expectedDate);
-  assert.equal(persisted.competicoes[0].expectedEndDate, competition.expectedEndDate);
+  const persisted = await dataStore.get('competicoes', competition.id);
+  assert.equal(persisted.image, validPng);
+  assert.equal(persisted.expectedDate, competition.expectedDate);
+  assert.equal(persisted.expectedEndDate, competition.expectedEndDate);
 
   for (const dates of [
     { expectedEndDate: '2026-12-19' },
@@ -397,7 +411,7 @@ test('CRUD de competição autenticado valida a imagem e persiste somente dados 
     });
     assert.equal(invalidDates.status, 400, JSON.stringify(dates));
   }
-  const unchanged = JSON.parse(await fs.readFile(databasePath, 'utf8')).competicoes[0];
+  const unchanged = await dataStore.get('competicoes', competition.id);
   assert.equal(unchanged.expectedDate, competition.expectedDate);
   assert.equal(unchanged.expectedEndDate, competition.expectedEndDate);
 

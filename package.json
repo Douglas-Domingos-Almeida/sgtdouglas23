@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node scripts/dev.js",
     "admin:setup": "node BackEnd/scripts/setup-admin.js",
+    "mysql:setup": "node BackEnd/scripts/setup-mysql.js",
     "build": "vite build",
     "build:public": "vite build --mode public-snapshot",
     "test:public": "node --test scripts/public-snapshot.test.js",

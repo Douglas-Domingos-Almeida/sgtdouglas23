@@ -6,7 +6,7 @@
   <meta name="uca-api-base" content="http://127.0.0.1:3000">
   <title>Projeto UCA</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23c8102e%22/%3E%3Ctext x=%2232%22 y=%2242%22 text-anchor=%22middle%22 font-family=%22Arial,sans-serif%22 font-size=%2224%22 font-weight=%22700%22 fill=%22white%22%3EUCA%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style-modern.css?v=20261110-uca-header-r8">
+  <link rel="stylesheet" href="css/style-modern.css?v=20261115-acesso-glass">
 </head>
 <body>
   <p class="news-registration__status" id="localServerNotice" role="alert" hidden>
@@ -98,11 +98,19 @@
       <form class="admin-auth-dialog__form" id="adminAuthForm">
         <h2 id="adminAuthTitle">Acesso UCA<br>Administrador / Membros</h2>
         <p class="admin-auth-dialog__notice"><strong>Acesso restrito a membros</strong><br><small>(Não tem uma conta? Solicite seu cadastro com o administrador)</small></p>
-        <label for="adminAuthUsername">Usuário</label>
+        <label for="adminAuthUsername">Data de nascimento (conforme a planilha)</label>
         <input id="adminAuthUsername" name="username" type="text" autocomplete="username" maxlength="100" required>
-        <label for="adminAuthPassword">Senha</label>
-        <input id="adminAuthPassword" name="password" type="password" autocomplete="current-password" required>
-        <button class="admin-auth-dialog__password-toggle" type="button" data-password-visibility aria-pressed="false">Mostrar senha</button>
+        <label for="adminAuthPassword">BRA (conforme a planilha)</label>
+        <div class="admin-auth-dialog__password-wrap">
+          <input id="adminAuthPassword" name="password" type="password" autocomplete="current-password" required>
+          <button class="admin-auth-dialog__password-toggle" type="button" data-password-visibility aria-pressed="false" aria-label="Mostrar senha" title="Mostrar senha">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+              <path class="admin-auth-dialog__password-slash" d="M5 19 19 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
         <p class="admin-auth-dialog__status" id="adminAuthStatus" role="status" aria-live="polite"></p>
         <div class="admin-auth-dialog__actions">
           <button class="button button--secondary" type="button" data-auth-home>Voltar à página inicial</button>
@@ -112,17 +120,17 @@
       <section class="admin-auth-dialog__form" id="adminAuthAccount" aria-labelledby="adminAuthAccountTitle" hidden>
         <h2 id="adminAuthAccountTitle">Minha conta</h2>
         <p>Usuário: <strong data-auth-username></strong></p>
-        <form id="adminPasswordChangeForm">
+        <form id="adminPasswordChangeForm" hidden>
           <label for="adminCurrentPassword">Senha atual</label>
           <input id="adminCurrentPassword" name="currentPassword" type="password" autocomplete="current-password" required>
           <label for="adminNewPassword">Nova senha</label>
           <input id="adminNewPassword" name="newPassword" type="password" autocomplete="new-password" minlength="16" maxlength="1024" required>
-          <p class="admin-auth-dialog__status" id="adminAuthAccountStatus" role="status" aria-live="polite"></p>
           <div class="admin-auth-dialog__actions">
-            <button class="button button--secondary" type="button" data-admin-logout>Encerrar sessão</button>
             <button class="button button--primary" type="submit">Alterar senha</button>
           </div>
         </form>
+        <p class="admin-auth-dialog__status" id="adminAuthAccountStatus" role="status" aria-live="polite"></p>
+        <button class="button button--secondary" type="button" data-admin-logout>Encerrar sessão</button>
       </section>
     </dialog>
 
@@ -130,7 +138,7 @@
     <script src="js/main.js?v=20261110-uca-header-r2"></script>
     <script src="js/news-data.js?v=20261014-file-support" charset="utf-8" defer></script>
     <script src="js/news.js?v=20261024-news-badges" defer></script>
-    <script type="module" src="js/admin-auth.js?v=20261110-uca-header-r2"></script>
+    <script type="module" src="js/admin-auth.js?v=20261115-acesso-glass"></script>
     <script type="module" src="js/competitions.js?v=20261026-competitions-v3"></script>
 
   <section class="testimonial-registration page__view page__view--hidden page" data-view="cadastro-depoimento" aria-hidden="true" inert>

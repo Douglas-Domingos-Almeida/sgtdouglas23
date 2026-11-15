@@ -1,41 +1,95 @@
 # Projeto UCA
 
+## Banco de dados MySQL
+
+O conteúdo do site (notícias, competições e depoimentos) é persistido em um banco MySQL local.
+A autenticação consulta `ABRAM_SC.Associados`. Antes do primeiro uso,
+crie o banco e um usuário dedicado no MySQL (como root):
+
+```sql
+CREATE DATABASE uca CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+CREATE USER 'uca_app'@'localhost' IDENTIFIED BY 'uma-senha-forte-local';
+GRANT ALL PRIVILEGES ON uca.* TO 'uca_app'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+Depois, informe a senha ao backend com o assistente interativo (testa a conexão e salva a
+configuração fora do repositório):
+
+```powershell
+npm run mysql:setup
+```
+
+Como alternativa manual, crie o arquivo `mysql.json` ao lado da configuração
+administrativa (no Windows, `%LOCALAPPDATA%\Projeto UCA\mysql.json`):
+
+```json
+{ "password": "uma-senha-forte-local" }
+```
+
+Os demais campos (`host`, `port`, `database`, `user`, `tablePrefix`) são opcionais no mesmo
+arquivo; os padrões são `127.0.0.1`, `3306`, `uca` e `uca_app`. As variáveis de ambiente
+`MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD` e
+`MYSQL_TABLE_PREFIX` têm precedência sobre o arquivo, e `UCA_MYSQL_CONFIG_FILE` permite
+apontar para outro caminho de configuração. Não versione esse arquivo nem compartilhe a senha.
+
+Na primeira inicialização, a API cria as tabelas e importa uma única vez os dados legados de
+`BackEnd/db.json` (marcador `legacy-json-import-v1`). Como alternativa, importe manualmente o
+script gerado `BackEnd/uca-export.sql` com:
+
+```powershell
+mysql -u uca_app -p uca < BackEnd/uca-export.sql
+```
+
+Após a migração, o MySQL é a fonte de verdade do conteúdo; o `db.json` permanece apenas como
+fonte da migração inicial.
+
+## Importação de associados
+
+Instale Python 3 e mantenha `imagens/Associados_ABRAM_SC.ods` fora de publicações e backups
+públicos. O arquivo está ignorado pelo Git e bloqueado pelo servidor de desenvolvimento Vite;
+outros servidores devem bloquear seu acesso separadamente. A planilha contém dados pessoais.
+
+Com o MySQL configurado, use um usuário que possa criar o banco `ABRAM_SC` e criar e consultar
+suas tabelas, além de acessar `uca`:
+
+```powershell
+npm --prefix BackEnd run associados:import
+```
+
+O importador lê a aba original com Python, preserva os quatro campos como texto e adiciona
+`linha_planilha` para preservar a ordem. Linhas vazias dentro dos dados são preservadas;
+as células vazias ilimitadas ao final da grade não são importadas. Se a tabela já existir,
+o comando interrompe sem sobrescrevê-la. A API precisa de permissão de leitura nessa tabela.
+Se a importação falhar após criar a tabela, ela permanecerá vazia; examine-a antes de tentar
+novamente. Para outro arquivo, acrescente seu caminho após `--`.
+
 ## Iniciar o ambiente local
 
-No primeiro uso, a tarefa oficial `npm run dev` abre a configuração da conta administrativa no terminal: informe um usuário e uma senha forte de pelo menos 16 caracteres duas vezes. A senha não é exibida. Seu hash scrypt é salvo fora do repositório e copiado para o banco local de autenticação na primeira inicialização. Para configurar a conta sem iniciar o site:
-
-```powershell
-npm run admin:setup
-```
-
-Para adicionar a conta inicial `BRA0460` como Administrador UCA sem substituir a conta administrativa local existente, use o bootstrap do banco de autenticação:
-
-```powershell
-npm --prefix BackEnd run auth:bootstrap-admin
-```
-
-O comando solicita e confirma uma senha de pelo menos 16 caracteres sem exibi-la. A senha é armazenada somente como hash scrypt no banco SQLite de autenticação, fora do repositório. A senha curta divulgada anteriormente não é aceita por esse bootstrap.
-
-Depois, inicie frontend e API juntos:
+Após importar a planilha, inicie frontend e API juntos:
 
 ```powershell
 npm run dev
 ```
 
-`npm run dev` configura a conta local uma única vez quando necessário, depois inicia a API e o Vite. A mesma configuração deve permanecer disponível ao iniciar apenas a API com `npm --prefix BackEnd start`; ela semeia a conta inicial quando o banco de usuários está vazio. A inicialização falha fechada se não houver uma conta configurada; não existe senha padrão. A senha curta informada durante o pedido de implementação não é usada como credencial inicial: configure uma senha forte e privada no terminal interativo.
+Em **Acesso UCA**, informe `D. NASC` e `BRA` exatamente como estão na planilha. Apenas o
+registro cujo BRA é `ADMBRA 0460` recebe o perfil de administrador; os demais são membros.
+As contas SQLite anteriores não autenticam mais, e as funções de troca de senha e gerenciamento
+de usuários foram desativadas. A autenticação usa a cópia importada no MySQL: alterações
+posteriores na planilha não são sincronizadas automaticamente.
 
-O botão **Acesso UCA** abre o login de Administrador UCA ou Membro UCA. Ambos podem acessar as páginas e operações de cadastro; somente administradores podem criar/excluir contas. A página `#cadastro` e as demais rotas de cadastro exigem sessão autenticada. O usuário pode alterar sua senha em **Minha conta**; senhas precisam ter pelo menos 16 caracteres. Para HTTP local, `AUTH_COOKIE_SECURE=false` é necessário; não use essa configuração fora do desenvolvimento local.
-
-Administradores criam e excluem contas em **Gerenciar usuários**, na página `#cadastro`. O banco SQLite de autenticação fica fora do repositório, por padrão em `%LOCALAPPDATA%\Projeto UCA\users.sqlite` no Windows (ou na pasta de configuração correspondente em outros sistemas). Senhas são armazenadas com scrypt e nunca são incluídas nas respostas da API. Preserve esse banco em backups protegidos.
+**Risco:** data de nascimento e BRA não são senhas secretas e podem permitir que terceiros
+assumam contas, inclusive a administrativa. Não exponha essa autenticação à internet; substitua-a
+por senhas individuais fortes antes de disponibilizar o sistema publicamente.
 
 ## Configuração de implantação
 
 ### Site público somente para consulta
 
 Execute `npm run build:public` e publique somente a pasta `dist` no Vercel. Esse build
-gera `dados/depoimentos.json`, `dados/competicoes.json` e `dados/noticias.json` com
-campos públicos permitidos. Notícias em rascunho ou agendadas para uma data futura,
-fontes editoriais de notícias e o banco completo não são incluídos.
+lê o conteúdo do banco MySQL local e gera `dados/depoimentos.json`, `dados/competicoes.json`
+e `dados/noticias.json` com campos públicos permitidos. Notícias em rascunho ou agendadas
+para uma data futura, fontes editoriais de notícias e o banco completo não são incluídos.
 
 O site lê essa cópia sem conectar à API local. Login e cadastros ficam desabilitados;
 alterações locais só aparecem online após executar o build novamente e republicar.
@@ -46,20 +100,19 @@ para editar localmente. Valide o exportador com `npm run test:public`.
 
 ### Implantação com API e administração online
 
-- `ADMIN_USERNAME`: usuário administrativo inicial (até 100 caracteres).
-- `ADMIN_PASSWORD_HASH`: saída de `npm --prefix BackEnd run auth:hash`; contém salt aleatório e derivação scrypt, não a senha em texto claro.
-- `UCA_ADMIN_CONFIG_FILE`: opcional, caminho para um arquivo local de configuração administrativa, caso não use variáveis de ambiente ou o local padrão.
-- `UCA_AUTH_DB_PATH`: opcional, caminho absoluto para o banco SQLite de usuários e hashes de senha; o padrão é `users.sqlite` ao lado da configuração administrativa.
 - `APP_ORIGIN`: origem exata do site no navegador, sem caminho (por exemplo, `https://uca.example.org`).
 - `AUTH_COOKIE_SECURE=true`: obrigatório com `NODE_ENV=production`; a implantação deve usar HTTPS.
 - `PORT`: opcional, porta local da API (padrão `3000`).
-- `DB_PATH`: opcional, caminho absoluto para o arquivo JSON de persistência; o padrão é `BackEnd/db.json`.
+- `DB_PATH`: opcional, caminho do arquivo JSON legado usado apenas na migração inicial para o MySQL; o padrão é `BackEnd/db.json`.
+- `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`: conexão com o banco MySQL de conteúdo (padrões: `127.0.0.1`, `3306`, `uca`, `uca_app`; a senha é obrigatória por variável ou pelo arquivo `mysql.json`).
+- `UCA_MYSQL_CONFIG_FILE`: opcional, caminho para o arquivo local de configuração do MySQL.
+- `MYSQL_TABLE_PREFIX`: opcional, prefixo dos nomes das tabelas (usado pelos testes para isolar dados).
 
 Configure `uca-api-base` nos dois documentos HTML para a origem HTTPS da API, e configure o proxy reverso para encaminhar essa origem à API local na porta definida. A origem da API deve ser same-site com o site para que os cookies `SameSite=Strict` funcionem. Mantenha a API não exposta diretamente à Internet; use HTTPS, proxy reverso, limites de requisição e controles operacionais apropriados.
 
-Guarde `ADMIN_PASSWORD_HASH` e demais configurações fora do repositório, em variáveis protegidas pelo ambiente de execução ou em um gerenciador de segredos. Não compartilhe nem versione credenciais ou arquivos de configuração locais.
+Guarde as configurações fora do repositório, em variáveis protegidas pelo ambiente de execução ou em um gerenciador de segredos. Não compartilhe nem versione credenciais ou arquivos de configuração locais.
 
-As sessões são mantidas em memória e expiram em oito horas; reiniciar a API encerra as sessões. Esta implementação é para uma única instância. Ambientes com múltiplas instâncias precisam de armazenamento de sessão compartilhado e limitação de tentativas no proxy antes da implantação. A conta administrativa configurada é usada apenas para semear o banco quando ele ainda não contém usuários; depois disso, o SQLite é a fonte de verdade.
+As sessões são mantidas em memória e expiram em oito horas; reiniciar a API encerra as sessões. Esta implementação é para uma única instância. Ambientes com múltiplas instâncias precisam de armazenamento de sessão compartilhado e limitação de tentativas no proxy antes da implantação.
 
 ## Datas das competições
 
@@ -76,4 +129,10 @@ npm test
 npm run build
 ```
 
-Os testes da API inicializam instâncias isoladas e usam bancos temporários, sem modificar `BackEnd/db.json` ou a configuração administrativa local.
+Os testes existentes da API exigem o MySQL local e ainda precisam ser atualizados para a
+autenticação por associados. Os testes focados da integração podem ser executados sem MySQL:
+
+```powershell
+node --test BackEnd\test\associados-auth.test.js
+python BackEnd\test\read-associados-ods.test.py
+```
