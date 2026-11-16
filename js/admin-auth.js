@@ -42,9 +42,6 @@
         ? 'Abrir opções da conta'
         : 'Acesso UCA para membros');
     }
-    document.querySelectorAll('[data-registration-access]').forEach((element) => {
-      element.hidden = !session.authenticated;
-    });
     if (userManagement) userManagement.hidden = true;
     if (accountUsername) accountUsername.textContent = session.username;
   }

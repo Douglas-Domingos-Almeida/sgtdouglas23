@@ -1067,6 +1067,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const menuToggle = document.querySelector('.site-header__menu-toggle');
   const mainNavigation = document.querySelector('.site-header__navigation');
   const submenus = document.querySelectorAll('.site-header__submenu');
+  const registrationMenuLink = document.querySelector('.site-header__submenu [data-route="cadastro"]');
+  const registrationSubmenu = registrationMenuLink?.closest('.site-header__submenu');
   const athleteSearchForm = document.querySelector('.athlete-profile__form');
 
   const setSubmenuOpen = (isOpen, target = null) => {
@@ -1075,6 +1077,9 @@ document.addEventListener('DOMContentLoaded', () => {
       submenu.classList.toggle('site-header__submenu--open', open);
       submenu.querySelector('.site-header__submenu-toggle').setAttribute('aria-expanded', String(open));
       submenu.querySelector('.site-header__submenu-panel').hidden = !open;
+      if (submenu === registrationSubmenu) {
+        registrationMenuLink.setAttribute('aria-expanded', String(open));
+      }
     });
   };
 
@@ -1100,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.site-header__link').forEach((link) => {
     link.addEventListener('click', () => {
       link.classList.add('site-header__link--clicked');
-      if (link instanceof HTMLAnchorElement && window.closeMainNavigation) {
+      if (link instanceof HTMLAnchorElement && link !== registrationMenuLink && window.closeMainNavigation) {
         window.closeMainNavigation();
       }
     });
@@ -1744,6 +1749,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!route) return;
 
       event.preventDefault();
+      if (link === registrationMenuLink) {
+        setSubmenuOpen(true, registrationSubmenu);
+        return;
+      }
+
       const currentRoute = window.location.hash.replace('#', '').trim();
       window.location.hash = route;
       if (currentRoute === route) handleRoute();
