@@ -2,4 +2,6 @@ node_modules/
 dist/
 .vite/
 .venv/
+__pycache__/
 imagens/Associados_ABRAM_SC.ods
+imagens/.~lock*
