@@ -1,0 +1,106 @@
+---
+title: "PROJETO UCA — Modelo Lógico (DER) · Banco atletismo_masters · Normalizado 1FN/2FN/3FN — livre de anomalias"
+config:
+  theme: neutral
+  er:
+    fontSize: 14
+---
+erDiagram
+    ATLETA {
+        varchar(32)  codigo_bra PK "codigo BRA ou SEM-BRA-nnnn"
+        varchar(255) nome_completo "nome oficial do atleta"
+        varchar(191) nome_normalizado "casamento com o site"
+        date         data_nascimento "opcional"
+        char(2)      uf "opcional"
+        tinyint      socio_ativo "1=ativo, 0=historico"
+    }
+
+    ATLETA_ALIAS {
+        varchar(191) nome_variacao PK "grafia alternativa normalizada"
+        varchar(255) nome_variacao_original
+        varchar(32)  codigo_bra FK
+    }
+
+    COMPETICAO {
+        bigint       id_competicao PK
+        varchar(191) nome_competicao UK
+        enum         classificacao "Local|Estadual|Regional|Nacional"
+        enum         frequencia "Anual|Eventual|Inativo"
+    }
+
+    EDICAO {
+        bigint      id_edicao PK
+        bigint      id_competicao FK
+        smallint    ano
+        varchar(50) numero_edicao "UK(competicao,ano,numero)"
+    }
+
+    CATEGORIA {
+        bigint      id_categoria PK
+        varchar(32) codigo UK "faixa etaria, ex: M50"
+    }
+
+    PROVA {
+        bigint       id_prova PK
+        varchar(150) nome_prova "UK(nome,descricao)"
+        varchar(255) descricao
+        enum         tipo_prova "INDIVIDUAL|REVEZAMENTO|MISTO"
+        enum         tipo_medida "TEMPO|DISTANCIA|PONTOS"
+    }
+
+    SESSAO_PROVA {
+        bigint       id_sessao PK
+        bigint       id_edicao FK
+        bigint       id_prova FK
+        bigint       id_categoria FK
+        varchar(100) fase "UK(edicao,prova,categoria,fase)"
+    }
+
+    ORGANIZACAO {
+        bigint       id_organizacao PK
+        varchar(191) nome_organizacao UK "clube/equipe de origem"
+    }
+
+    EQUIPE {
+        bigint       id_equipe PK
+        bigint       id_sessao FK "revezamento pertence a sessao"
+        bigint       id_organizacao FK "opcional"
+        varchar(191) nome_equipe
+        char(64)     chave_fonte UK "hash da origem no site"
+    }
+
+    EQUIPE_COMPOSICAO {
+        bigint      id_equipe PK, FK
+        smallint    ordem PK "posicao no revezamento"
+        varchar(32) codigo_bra FK "UK(equipe,atleta)"
+    }
+
+    RESULTADO {
+        bigint       id_resultado PK
+        char(64)     source_key UK "hash da linha do site"
+        bigint       id_sessao FK
+        enum         tipo_participante "ATLETA|EQUIPE"
+        varchar(32)  codigo_bra FK "XOR com id_equipe"
+        bigint       id_equipe FK "XOR com codigo_bra"
+        bigint       id_organizacao FK "equipe publicada no site"
+        varchar(255) atleta_fonte "proveniencia: nome bruto do site"
+        varchar(32)  posicao
+        varchar(64)  marca "tempo/distancia/pontos"
+        varchar(32)  vento
+        date         data_prova
+        varchar(255) local_prova
+    }
+
+    ATLETA        ||--o{ ATLETA_ALIAS      : "possui variacao de nome (1:N)"
+    COMPETICAO    ||--o{ EDICAO            : "realiza (1:N)"
+    EDICAO        ||--o{ SESSAO_PROVA      : "contem (1:N)"
+    PROVA         ||--o{ SESSAO_PROVA      : "e disputada em (1:N)"
+    CATEGORIA     ||--o{ SESSAO_PROVA      : "enquadra (1:N)"
+    SESSAO_PROVA  ||--o{ RESULTADO         : "registra (1:N)"
+    ATLETA        |o--o{ RESULTADO         : "alcanca individual (0..1:N, 1x por sessao)"
+    EQUIPE        |o--o| RESULTADO         : "alcanca revezamento (0..1:0..1, XOR atleta)"
+    SESSAO_PROVA  ||--o{ EQUIPE            : "inscreve (1:N)"
+    ORGANIZACAO   |o--o{ EQUIPE            : "representa (0..1:N)"
+    ORGANIZACAO   |o--o{ RESULTADO         : "e equipe de origem (0..1:N)"
+    EQUIPE        ||--|{ EQUIPE_COMPOSICAO : "e composta por (1:N, min 1)"
+    ATLETA        ||--o{ EQUIPE_COMPOSICAO : "integra (1:N) — N:N resolvido"
