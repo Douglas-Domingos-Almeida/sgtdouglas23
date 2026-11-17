@@ -1039,9 +1039,33 @@ function initJuntosPodemosVideos() {
   }
 }
 
+function initVideoRegistration() {
+  const form = document.getElementById('videoRegistrationForm');
+  if (!form) return;
+  const status = form.querySelector('[role="status"]');
+
+  form.addEventListener('input', () => {
+    status.textContent = '';
+  });
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    // O cadastro de vídeos ainda não possui gravação no backend.
+    status.textContent = 'Vídeo validado, mas ainda não foi salvo: o cadastro de vídeos ainda não está conectado ao servidor.';
+  });
+
+  form.querySelector('[data-video-registration-cancel]').addEventListener('click', () => {
+    form.reset();
+    status.textContent = '';
+    window.location.hash = 'home';
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initTestimonialActions();
   initJuntosPodemosVideos();
+  initVideoRegistration();
 
   const desktopVideoQuery = window.matchMedia('(min-width: 901px)');
   const responsiveVideoSources = document.querySelectorAll('.transformar-uniao__imagem source');
@@ -1684,7 +1708,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'cadastro',
       'cadastro-noticia',
       'cadastro-competicao',
-      'cadastro-depoimento'
+      'cadastro-depoimento',
+      'cadastro-video'
     ]);
 
     if (registrationRoutes.has(hash)) {

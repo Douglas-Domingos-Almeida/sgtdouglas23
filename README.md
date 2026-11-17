@@ -64,6 +64,51 @@ o comando interrompe sem sobrescrevê-la. A API precisa de permissão de leitura
 Se a importação falhar após criar a tabela, ela permanecerá vazia; examine-a antes de tentar
 novamente. Para outro arquivo, acrescente seu caminho após `--`.
 
+## Resultados históricos de atletismo
+
+O banco `atletismo_masters` é separado do banco `ABRAM_SC` usado no login do site.
+Para um banco novo, crie o schema com `01_criar_banco_relacionado.sql` e confira
+as FKs com `02_validar_relacionamentos.sql` pelo cliente MySQL. O script de criação
+não atualiza tabelas já existentes; bancos antigos exigem migração revisada.
+
+Para atualizar um banco existente, aplique `05_migrar_ajustes_3fn.sql` após revisar
+o conteúdo e confirmar um backup. `tipo_medida` fica `NULL` até que uma regra confiável
+classifique cada prova como tempo, distância ou pontos. O cruzamento de resultados
+considera atletas ativos e inativos; o importador valida nomes normalizados repetidos
+entre atletas inativos antes de continuar.
+
+Os importadores usam a configuração local de MySQL descrita acima, mas conectam
+exclusivamente ao banco `atletismo_masters` no servidor local. A conta deve ter
+permissão de leitura e gravação nesse banco. Em PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-atletismo.txt
+.\.venv\Scripts\python.exe 03_importar_associados.py
+.\.venv\Scripts\python.exe 04_importar_resultados.py
+.\.venv\Scripts\python.exe -m unittest test_importar_associados test_importar_resultados
+```
+
+O importador de associados informa separadamente quantos códigos BRA foram inseridos
+e quantos já existiam e foram atualizados.
+
+O primeiro script lê `Downloads\Associados_ABRAM_SC.ods`; datas ausentes, inválidas
+ou fora de 1915–2005 são registradas como `NULL` com aviso. O segundo consulta a
+API pública, subdividindo consultas que atinjam seu limite de 1.000 linhas; se
+não for possível subdividir um grupo, ele interrompe antes de gravar os resultados.
+A API não informa um total geral, portanto a completude depende dos filtros que
+ela disponibiliza. Nenhum cadastro é criado automaticamente para nomes sem
+correspondência.
+
+Resultados ambíguos, datas incompletas e integrantes não identificados são enviados
+para `stg_resultados_pendentes`. A coluna `ocorrencias` conserva repetições
+indistinguíveis da fonte. Para pendências de correspondência individual e de
+integrantes identificáveis, decisões `RESOLVIDO` com `codigo_bra_resolvido` e
+`IGNORADO` são respeitadas nas execuções seguintes. Conflitos de resultados e
+composições inválidas exigem tratamento manual. Equipes com composição incompleta
+não aparecem para integrantes não identificados na
+`vw_resultados_completos`. Revise as pendências antes de interpretar os totais.
+
 ## Iniciar o ambiente local
 
 Após importar a planilha, inicie frontend e API juntos:
@@ -120,7 +165,7 @@ Em **Cadastrar Competição**, a data prevista aceita um intervalo de data inici
 
 A área **Imagem da Competição**, incluindo **Selecionar imagem**, usa o seletor nativo de arquivos do navegador e também aceita arrastar e soltar. Selecione um JPG ou PNG de até 2 MB; a prévia confirma a seleção, e a imagem só é gravada ao salvar a competição. Após atualizar o site, use `Ctrl+F5` se o navegador ainda exibir a versão anterior.
 
-Não abra o HTML diretamente por `file://`: o Chrome bloqueia os módulos JavaScript nessa origem, impedindo tanto a prévia quanto o tratamento de arrastar e soltar. Nesse caso, o site mostra um aviso com o endereço correto. Use `npm run dev` e acesse `http://127.0.0.1:5173` nos dois navegadores; mantenha o terminal aberto. O seletor nativo pode abrir mesmo quando os módulos estão bloqueados, mas isso não significa que a imagem foi processada.
+Não abra o HTML diretamente por `file://`: o Chrome bloqueia os módulos JavaScript nessa origem, impedindo tanto a prévia quanto o tratamento de arrastar e soltar. Use `npm run dev` e acesse `http://127.0.0.1:5173` nos dois navegadores; mantenha o terminal aberto. O seletor nativo pode abrir mesmo quando os módulos estão bloqueados, mas isso não significa que a imagem foi processada.
 
 ## Testes e build
 

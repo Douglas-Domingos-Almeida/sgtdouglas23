@@ -9,16 +9,6 @@
   <link rel="stylesheet" href="../css/style-modern.css?v=20261115-acesso-glass">
 </head>
 <body>
-  <p class="news-registration__status" id="localServerNotice" role="alert" hidden>
-    Este site foi aberto como arquivo local. A seleção de imagens, o arrastar e soltar e o cadastro precisam do servidor local.
-    Execute <code>npm run dev</code> na pasta do projeto e
-    <a href="http://127.0.0.1:5173/#cadastro-competicao">abra o cadastro pelo servidor local</a>.
-  </p>
-  <script>
-    if (window.location.protocol === 'file:') {
-      document.getElementById('localServerNotice').hidden = false;
-    }
-  </script>
   <header class="site-header site-header--home">
     <div class="site-header__art">
       <img class="site-header__art-image" src="../imagens/Cabe%C3%A7alho%20UCA%20sem%20painel%20central.png?v=20261116-logo-clean" alt="Cabeçalho da UCA Master: UNIÃO CATARINENSE DE ATLETISMO, quatro atletas na pista e efeitos luminosos.">
@@ -57,6 +47,7 @@
             <a class="site-header__submenu-link" href="#cadastro-noticia" data-route="cadastro-noticia">Notícia</a>
             <a class="site-header__submenu-link" href="#cadastro-competicao" data-route="cadastro-competicao">Competição</a>
             <a class="site-header__submenu-link" href="#cadastro-depoimento" data-route="cadastro-depoimento">Depoimento</a>
+            <a class="site-header__submenu-link" href="#cadastro-video" data-route="cadastro-video">Vídeos</a>
           </div>
         </div>
         <a href="#quem-somos" class="site-header__link">
@@ -136,11 +127,34 @@
     </dialog>
 
     <script src="../js/text-utils.js?v=20261021-dry-refactor"></script>
-    <script src="../js/main.js?v=20261110-uca-header-r2"></script>
+    <script src="../js/main.js?v=20261117-cadastro-video"></script>
     <script src="../js/news-data.js?v=20261014-file-support" charset="utf-8" defer></script>
     <script src="../js/news.js?v=20261024-news-badges" defer></script>
     <script type="module" src="../js/admin-auth.js?v=20261115-acesso-glass"></script>
     <script type="module" src="../js/competitions.js?v=20261026-competitions-v3"></script>
+
+  <section class="testimonial-registration page__view page__view--hidden page" data-view="cadastro-video" aria-hidden="true" inert>
+    <h1>Adicione um vídeo novo:</h1>
+    <form class="testimonial-registration__form" id="videoRegistrationForm">
+      <div class="testimonial-registration__field">
+        <label for="video-title">Título do vídeo</label>
+        <input id="video-title" name="title" type="text" maxlength="200" placeholder="Insira o título do vídeo" required>
+      </div>
+      <div class="testimonial-registration__field">
+        <label for="video-url">Link do vídeo (YouTube ou arquivo MP4)</label>
+        <input id="video-url" name="url" type="url" placeholder="https://www.youtube.com/watch?v=..." required>
+      </div>
+      <div class="testimonial-registration__field">
+        <label for="video-description">Descrição</label>
+        <textarea id="video-description" name="description" rows="3" maxlength="1000" placeholder="Descreva o conteúdo do vídeo (opcional)"></textarea>
+      </div>
+      <p class="testimonial-registration__status" role="status" aria-live="polite"></p>
+      <div class="testimonial-registration__actions">
+        <button class="button button--primary" type="submit">Adicionar</button>
+        <button class="button button--secondary" type="button" data-video-registration-cancel>Cancelar</button>
+      </div>
+    </form>
+  </section>
 
   <main class="news-registration page__view page__view--hidden page" data-view="cadastro-noticia" aria-hidden="true" inert>
     <div class="news-registration__container">
