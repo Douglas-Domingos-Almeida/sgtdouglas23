@@ -6,7 +6,7 @@
   <meta name="uca-api-base" content="http://127.0.0.1:3000">
   <title>Projeto UCA</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23c8102e%22/%3E%3Ctext x=%2232%22 y=%2242%22 text-anchor=%22middle%22 font-family=%22Arial,sans-serif%22 font-size=%2224%22 font-weight=%22700%22 fill=%22white%22%3EUCA%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style-modern.css?v=20261115-acesso-glass">
+  <link rel="stylesheet" href="css/style-modern.css?v=20261118-testimonial-grid-3x2-proportion-r2">
 </head>
 <body>
   <header class="site-header site-header--home">
@@ -127,7 +127,7 @@
     </dialog>
 
     <script src="js/text-utils.js?v=20261021-dry-refactor"></script>
-    <script src="js/main.js?v=20261117-cadastro-video"></script>
+    <script src="js/main.js?v=20261118-testimonial-grid-4x2"></script>
     <script src="js/news-data.js?v=20261014-file-support" charset="utf-8" defer></script>
     <script src="js/news.js?v=20261024-news-badges" defer></script>
     <script type="module" src="js/admin-auth.js?v=20261115-acesso-glass"></script>
@@ -597,57 +597,99 @@
 
     <section class="testimonials-section" id="depoimentos" aria-labelledby="testimonials-title">
       <div class="testimonials-section__header">
-        <span class="testimonials-section__tag">Vozes da UCA</span>
-        <h2 id="testimonials-title">Depoimentos de atletas</h2>
-        <p>Histórias de quem faz parte da nossa comunidade de atletismo Master.</p>
+        <div class="testimonials-section__heading">
+          <span class="testimonials-section__tag">Vozes da UCA</span>
+          <h2 id="testimonials-title">Depoimentos de atletas</h2>
+          <p>Histórias de quem faz parte da nossa comunidade de atletismo Master.</p>
+        </div>
+        <form class="testimonials-search" id="testimonials-search" role="search" aria-label="Pesquisar depoimentos de atletas">
+          <div class="testimonials-search__control">
+            <svg class="testimonials-search__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/>
+              <path d="M15.5 15.5 21 21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+            <input id="testimonials-search-input" name="q" type="search" placeholder="Pesquisar depoimentos..." aria-label="Pesquisar depoimentos" autocomplete="off">
+            <button class="testimonials-search__clear" type="button" aria-label="Limpar pesquisa" disabled>Limpar</button>
+            <button class="testimonials-search__submit" type="submit">Buscar</button>
+          </div>
+        </form>
       </div>
 
       <ul class="testimonials-grid" aria-label="Depoimentos de atletas da UCA Master">
         <li class="testimonial-card">
           <article>
-            <img class="testimonial-card__portrait" src="imagens/Master/Master%20(1).jfif" alt="Atleta UCA Master em competição, foto 1" loading="lazy">
-            <h3 class="testimonial-card__name">Atleta UCA Master</h3>
-            <p class="testimonial-card__role">Atletismo Master</p>
-            <div class="testimonial-card__divider" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="testimonial-card__award">
+              <span class="testimonial-card__laurel testimonial-card__laurel--left" aria-hidden="true"></span>
+              <img class="testimonial-card__portrait" src="imagens/Master/Master%20(1).jfif" alt="Atleta UCA Master em competição, foto 1" loading="lazy">
+              <span class="testimonial-card__badge">Atleta UCA</span>
+              <span class="testimonial-card__laurel testimonial-card__laurel--right" aria-hidden="true"></span>
+            </div>
+            <h3 class="testimonial-card__name"><span>Atleta UCA Master</span></h3>
             <blockquote class="testimonial-card__quote">
               <p>Depoimento em breve.</p>
             </blockquote>
+            <div class="testimonial-card__footer">
+              <p class="testimonial-card__role"><span class="testimonial-card__author">Atletismo Master</span><span class="testimonial-card__date"></span></p>
+              <a class="testimonial-card__view" href="#depoimentos"><span aria-hidden="true">▶</span>Visualizar o<br>Depoimento</a>
+            </div>
           </article>
         </li>
         <li class="testimonial-card">
           <article>
-            <img class="testimonial-card__portrait" src="imagens/Master/Master%20(2).jfif" alt="Atleta UCA Master em competição, foto 2" loading="lazy">
-            <h3 class="testimonial-card__name">Atleta UCA Master</h3>
-            <p class="testimonial-card__role">Atletismo Master</p>
-            <div class="testimonial-card__divider" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="testimonial-card__award">
+              <span class="testimonial-card__laurel testimonial-card__laurel--left" aria-hidden="true"></span>
+              <img class="testimonial-card__portrait" src="imagens/Master/Master%20(2).jfif" alt="Atleta UCA Master em competição, foto 2" loading="lazy">
+              <span class="testimonial-card__badge">Atleta UCA</span>
+              <span class="testimonial-card__laurel testimonial-card__laurel--right" aria-hidden="true"></span>
+            </div>
+            <h3 class="testimonial-card__name"><span>Atleta UCA Master</span></h3>
             <blockquote class="testimonial-card__quote">
               <p>Depoimento em breve.</p>
             </blockquote>
+            <div class="testimonial-card__footer">
+              <p class="testimonial-card__role"><span class="testimonial-card__author">Atletismo Master</span><span class="testimonial-card__date"></span></p>
+              <a class="testimonial-card__view" href="#depoimentos"><span aria-hidden="true">▶</span>Visualizar o<br>Depoimento</a>
+            </div>
           </article>
         </li>
         <li class="testimonial-card">
           <article>
-            <img class="testimonial-card__portrait" src="imagens/Master/Master%20(3).jfif" alt="Atleta UCA Master em competição, foto 3" loading="lazy">
-            <h3 class="testimonial-card__name">Atleta UCA Master</h3>
-            <p class="testimonial-card__role">Atletismo Master</p>
-            <div class="testimonial-card__divider" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="testimonial-card__award">
+              <span class="testimonial-card__laurel testimonial-card__laurel--left" aria-hidden="true"></span>
+              <img class="testimonial-card__portrait" src="imagens/Master/Master%20(3).jfif" alt="Atleta UCA Master em competição, foto 3" loading="lazy">
+              <span class="testimonial-card__badge">Atleta UCA</span>
+              <span class="testimonial-card__laurel testimonial-card__laurel--right" aria-hidden="true"></span>
+            </div>
+            <h3 class="testimonial-card__name"><span>Atleta UCA Master</span></h3>
             <blockquote class="testimonial-card__quote">
               <p>Depoimento em breve.</p>
             </blockquote>
+            <div class="testimonial-card__footer">
+              <p class="testimonial-card__role"><span class="testimonial-card__author">Atletismo Master</span><span class="testimonial-card__date"></span></p>
+              <a class="testimonial-card__view" href="#depoimentos"><span aria-hidden="true">▶</span>Visualizar o<br>Depoimento</a>
+            </div>
           </article>
         </li>
         <li class="testimonial-card">
           <article>
-            <img class="testimonial-card__portrait" src="imagens/Master/Master%20(4).jfif" alt="Atleta UCA Master em competição, foto 4" loading="lazy">
-            <h3 class="testimonial-card__name">Atleta UCA Master</h3>
-            <p class="testimonial-card__role">Atletismo Master</p>
-            <div class="testimonial-card__divider" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="testimonial-card__award">
+              <span class="testimonial-card__laurel testimonial-card__laurel--left" aria-hidden="true"></span>
+              <img class="testimonial-card__portrait" src="imagens/Master/Master%20(4).jfif" alt="Atleta UCA Master em competição, foto 4" loading="lazy">
+              <span class="testimonial-card__badge">Atleta UCA</span>
+              <span class="testimonial-card__laurel testimonial-card__laurel--right" aria-hidden="true"></span>
+            </div>
+            <h3 class="testimonial-card__name"><span>Atleta UCA Master</span></h3>
             <blockquote class="testimonial-card__quote">
               <p>Depoimento em breve.</p>
             </blockquote>
+            <div class="testimonial-card__footer">
+              <p class="testimonial-card__role"><span class="testimonial-card__author">Atletismo Master</span><span class="testimonial-card__date"></span></p>
+              <a class="testimonial-card__view" href="#depoimentos"><span aria-hidden="true">▶</span>Visualizar o<br>Depoimento</a>
+            </div>
           </article>
         </li>
       </ul>
+      <p class="testimonials-section__search-status" role="status" aria-live="polite"></p>
       <p class="testimonials-section__status" role="status" aria-live="polite"></p>
       <dialog class="testimonial-editor" aria-labelledby="testimonial-editor-title">
         <form method="dialog">
@@ -1133,6 +1175,70 @@
       </article>
     </section>
   </section>
+  </main>
+
+  <main class="testimonial-detail-page page__view page__view--hidden page" data-view="depoimento" aria-hidden="true" inert>
+    <section class="testimonial-detail" aria-labelledby="testimonial-detail-title">
+      <p class="testimonial-detail__status" role="status" aria-live="polite">Carregando depoimento...</p>
+      <div class="testimonial-detail__layout" hidden>
+        <aside class="testimonial-detail__sidebar" aria-label="Informações do atleta">
+          <a class="testimonial-detail__back" href="#depoimentos">← Voltar aos Depoimentos</a>
+          <img class="testimonial-detail__portrait" src="imagens/Master/Master%20(1).jfif" alt="">
+          <h2 class="testimonial-detail__athlete-title"></h2>
+          <p class="testimonial-detail__publication"></p>
+          <div class="testimonial-detail__divider" aria-hidden="true"></div>
+          <div class="testimonial-detail__share">
+            <h3>Compartilhe</h3>
+            <div class="testimonial-detail__share-actions">
+              <a data-share="whatsapp" href="#" target="_blank" rel="noopener noreferrer" aria-label="Compartilhar no WhatsApp">W</a>
+              <a data-share="facebook" href="#" target="_blank" rel="noopener noreferrer" aria-label="Compartilhar no Facebook">f</a>
+              <button data-share="instagram" type="button" aria-label="Compartilhar pelo Instagram">◎</button>
+              <button data-share="copy" type="button" aria-label="Copiar link do depoimento">↗</button>
+            </div>
+            <p class="testimonial-detail__share-status" role="status" aria-live="polite"></p>
+          </div>
+        </aside>
+
+        <article class="testimonial-detail__content">
+          <header class="testimonial-detail__header">
+            <span class="testimonial-detail__eyebrow">Depoimento do Atleta</span>
+            <h1 id="testimonial-detail-title" tabindex="-1"></h1>
+          </header>
+
+          <div class="testimonial-detail__message-grid">
+            <blockquote class="testimonial-detail__message">
+              <p></p>
+            </blockquote>
+          </div>
+
+          <section class="testimonial-detail__comments" aria-labelledby="testimonial-comments-title">
+            <h2 id="testimonial-comments-title">
+              <span aria-hidden="true">●</span>
+              Comentários <span data-comment-count>(0)</span>
+            </h2>
+            <ul class="testimonial-detail__comment-list"></ul>
+
+            <form class="testimonial-detail__comment-form">
+              <h3>Deixe seu comentário</h3>
+              <label for="testimonial-comment-message">Comentário</label>
+              <textarea id="testimonial-comment-message" name="message" rows="4" maxlength="1000" placeholder="Escreva seu comentário..." required></textarea>
+              <div class="testimonial-detail__comment-fields">
+                <div>
+                  <label for="testimonial-comment-name">Nome</label>
+                  <input id="testimonial-comment-name" name="name" type="text" maxlength="100" placeholder="Seu nome" autocomplete="name" required>
+                </div>
+                <div>
+                  <label for="testimonial-comment-email">E-mail</label>
+                  <input id="testimonial-comment-email" name="email" type="email" maxlength="254" placeholder="Seu e-mail" autocomplete="email" required>
+                </div>
+                <button class="testimonial-detail__comment-submit" type="submit">Publicar Comentário</button>
+              </div>
+              <p class="testimonial-detail__comment-status" role="status" aria-live="polite"></p>
+            </form>
+          </section>
+        </article>
+      </div>
+    </section>
   </main>
 
   <main class="news-page page__view page__view--hidden page" data-view="noticias" aria-hidden="true" inert>

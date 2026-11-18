@@ -10,6 +10,27 @@ const juntosPodemosVideoUrls = {
 };
 const athleteRankingApi = 'https://atletismomasters.com.br/wp-json/atletismo-rankings/v1/';
 const testimonialsApi = new URL('/depoimentos', apiBaseUrl).href;
+const testimonialsById = new Map();
+const testimonialImagesById = new Map();
+const testimonialCommentsById = new Map();
+let activeTestimonialDetailId = '';
+const referenceComments = Object.freeze([
+  {
+    name: 'Carlos Silva',
+    date: '27/10/2026',
+    message: 'Parabéns pelo depoimento! É muito bom ver o quanto a UCA valoriza seus atletas.'
+  },
+  {
+    name: 'Mariana Costa',
+    date: '22/10/2026',
+    message: 'Uma história inspiradora! Que venham muitos outros desafios e conquistas.'
+  },
+  {
+    name: 'Roberto Alves',
+    date: '24/10/2026',
+    message: 'Orgulho em fazer parte dessa equipe! Parabéns pela sua trajetória.'
+  }
+]);
 const athleteFilterFields = [
   { id: 'athlete-year', key: 'year', apiKey: 'ano' },
   { id: 'athlete-discipline', key: 'event', apiKey: 'prova' },
@@ -31,11 +52,66 @@ function initTestimonialActions() {
   const input = dialog.querySelector('textarea');
   const confirmation = dialog.querySelector('.testimonial-editor__confirmation');
   const submit = dialog.querySelector('[type="submit"]');
-  const status = section.querySelector('[role="status"]');
+  const status = section.querySelector('.testimonials-section__status');
+  const searchForm = section.querySelector('#testimonials-search');
+  const searchInput = searchForm?.elements.namedItem('q');
+  const searchClear = searchForm?.querySelector('.testimonials-search__clear');
+  const searchStatus = section.querySelector('.testimonials-section__search-status');
   const emptyCardTemplate = grid.querySelector('.testimonial-card').cloneNode(true);
   let activeCard = null;
   let activeAction = '';
   let apiReady = false;
+
+  function searchableText(testimonial) {
+    return [
+      testimonial.source,
+      testimonial.subject,
+      testimonial.quote,
+      testimonial.publicationDate,
+      formatPublicationDate(testimonial.publicationDate)
+    ].join(' ');
+  }
+
+  function applyTestimonialSearch() {
+    if (!searchInput || !searchClear || !searchStatus) return;
+    const query = window.UCAUtils.normalizeText(searchInput.value);
+    const terms = query.split(/\s+/).filter(Boolean);
+    let visibleCount = 0;
+
+    grid.querySelectorAll('.testimonial-card').forEach((card) => {
+      const content = window.UCAUtils.normalizeText(card.dataset.searchText);
+      const matches = Boolean(card.dataset.testimonialId)
+        && (terms.length === 0 || terms.every((term) => content.includes(term)));
+      card.hidden = !matches;
+      if (matches) visibleCount += 1;
+    });
+
+    searchClear.disabled = !searchInput.value.trim();
+    if (!terms.length) {
+      searchStatus.textContent = '';
+      return;
+    }
+    if (visibleCount === 0) {
+      searchStatus.textContent = `Nenhum depoimento encontrado para "${searchInput.value.trim()}".`;
+      return;
+    }
+    searchStatus.textContent = `${visibleCount} ${visibleCount === 1 ? 'depoimento encontrado' : 'depoimentos encontrados'}.`;
+  }
+
+  searchForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    applyTestimonialSearch();
+  });
+  searchInput?.addEventListener('input', () => {
+    if (searchClear) searchClear.disabled = !searchInput.value.trim();
+    if (!searchInput.value.trim()) applyTestimonialSearch();
+  });
+  searchClear?.addEventListener('click', () => {
+    searchForm.reset();
+    applyTestimonialSearch();
+    searchInput.focus();
+  });
+  applyTestimonialSearch();
 
   function setCardActions(card, index) {
     const actions = document.createElement('div');
@@ -89,21 +165,34 @@ function initTestimonialActions() {
     card.dataset.testimonialId = testimonial.id;
     card.dataset.source = testimonial.source;
     card.dataset.publicationDate = testimonial.publicationDate;
-    card.querySelector('.testimonial-card__name').textContent = testimonial.subject;
-    card.querySelector('.testimonial-card__role').textContent =
-      `Publicado por ${testimonial.source} em ${formatPublicationDate(testimonial.publicationDate)}`;
+    testimonialsById.set(String(testimonial.id), testimonial);
+    testimonialImagesById.set(String(testimonial.id), card.querySelector('.testimonial-card__portrait').src);
+    card.querySelector('.testimonial-card__view').href = `#depoimento/${encodeURIComponent(testimonial.id)}`;
+    card.querySelector('.testimonial-card__name span').textContent = testimonial.subject;
+    card.querySelector('.testimonial-card__author').textContent = testimonial.source;
+    card.querySelector('.testimonial-card__date').textContent =
+      `Publicado em ${formatPublicationDate(testimonial.publicationDate)}`;
     card.querySelector('.testimonial-card__quote p').textContent = testimonial.quote;
     card.querySelector('.testimonial-card__actions').hidden = !window.UcaAdminAuth?.isAuthenticated();
+    card.dataset.searchText = searchableText(testimonial);
+    applyTestimonialSearch();
+    if (activeTestimonialDetailId === String(testimonial.id)) {
+      renderTestimonialDetail(activeTestimonialDetailId);
+    }
   }
 
   function clearCard(card) {
     delete card.dataset.testimonialId;
     delete card.dataset.source;
     delete card.dataset.publicationDate;
-    card.querySelector('.testimonial-card__name').textContent = 'Atleta UCA Master';
-    card.querySelector('.testimonial-card__role').textContent = 'Atletismo Master';
+    card.querySelector('.testimonial-card__view').href = '#depoimentos';
+    card.querySelector('.testimonial-card__name span').textContent = 'Atleta UCA Master';
+    card.querySelector('.testimonial-card__author').textContent = 'Atletismo Master';
+    card.querySelector('.testimonial-card__date').textContent = '';
     card.querySelector('.testimonial-card__quote p').textContent = 'Depoimento em breve.';
     card.querySelector('.testimonial-card__actions').hidden = true;
+    delete card.dataset.searchText;
+    applyTestimonialSearch();
   }
 
   async function requestApi(url, options = {}) {
@@ -130,12 +219,12 @@ function initTestimonialActions() {
     sourceInput.value = activeCard.dataset.source;
     subjectInput.disabled = !editing;
     subjectInput.setCustomValidity('');
-    subjectInput.value = activeCard.querySelector('.testimonial-card__name').textContent;
+    subjectInput.value = activeCard.querySelector('.testimonial-card__name span').textContent;
     input.disabled = !editing;
     input.setCustomValidity('');
     input.value = activeCard.querySelector('.testimonial-card__quote p').textContent;
     confirmation.hidden = editing;
-    confirmation.textContent = `Excluir o depoimento de ${activeCard.querySelector('.testimonial-card__name').textContent}? Esta ação não pode ser desfeita.`;
+    confirmation.textContent = `Excluir o depoimento de ${activeCard.querySelector('.testimonial-card__name span').textContent}? Esta ação não pode ser desfeita.`;
     submit.textContent = editing ? 'Salvar' : 'Excluir';
     status.textContent = '';
     dialog.showModal();
@@ -293,6 +382,129 @@ function initTestimonialActions() {
       status.textContent = `Não foi possível carregar os depoimentos. Inicie o backend e recarregue a página. ${error.message}`;
       registrationStatus.textContent = 'O backend não está conectado. As alterações não poderão ser salvas.';
     });
+}
+
+function getTestimonialComments(id) {
+  if (!testimonialCommentsById.has(id)) {
+    testimonialCommentsById.set(id, referenceComments.map((comment) => ({ ...comment })));
+  }
+  return testimonialCommentsById.get(id);
+}
+
+function renderTestimonialComments(id) {
+  const page = document.querySelector('[data-view="depoimento"]');
+  const list = page.querySelector('.testimonial-detail__comment-list');
+  const count = page.querySelector('[data-comment-count]');
+  const comments = getTestimonialComments(id);
+
+  list.replaceChildren();
+  comments.forEach((comment) => {
+    const item = document.createElement('li');
+    item.className = 'testimonial-detail__comment';
+    const avatar = document.createElement('span');
+    avatar.className = 'testimonial-detail__comment-avatar';
+    avatar.textContent = comment.name.trim().charAt(0).toLocaleUpperCase('pt-BR') || '?';
+    avatar.setAttribute('aria-hidden', 'true');
+    const body = document.createElement('div');
+    body.className = 'testimonial-detail__comment-body';
+    const meta = document.createElement('div');
+    meta.className = 'testimonial-detail__comment-meta';
+    const name = document.createElement('strong');
+    name.textContent = comment.name;
+    const date = document.createElement('time');
+    date.textContent = comment.date;
+    const message = document.createElement('p');
+    message.textContent = comment.message;
+    meta.append(name, date);
+    body.append(meta, message);
+    item.append(avatar, body);
+    list.append(item);
+  });
+  count.textContent = `(${comments.length})`;
+}
+
+function formatTestimonialDate(value) {
+  if (!value) return '';
+  const [year, month, day] = String(value).split('-');
+  return year && month && day ? `${day}/${month}/${year}` : String(value);
+}
+
+function renderTestimonialDetail(id) {
+  activeTestimonialDetailId = id;
+  const page = document.querySelector('[data-view="depoimento"]');
+  const status = page.querySelector('.testimonial-detail__status');
+  const layout = page.querySelector('.testimonial-detail__layout');
+  const testimonial = testimonialsById.get(id);
+
+  if (!testimonial) {
+    layout.hidden = true;
+    status.hidden = false;
+    status.textContent = 'Carregando depoimento...';
+    return;
+  }
+
+  const imageSrc = testimonialImagesById.get(id)
+    || new URL('../imagens/Master/Master%20(1).jfif', mainScriptUrl).href;
+  const shareUrl = new URL(`#depoimento/${encodeURIComponent(id)}`, window.location.href).href;
+  status.hidden = true;
+  layout.hidden = false;
+  page.querySelector('.testimonial-detail__portrait').src = imageSrc;
+  page.querySelector('.testimonial-detail__portrait').alt = `Atleta do depoimento ${testimonial.subject}`;
+  page.querySelector('.testimonial-detail__athlete-title').textContent = testimonial.subject;
+  page.querySelector('.testimonial-detail__publication').textContent =
+    `Publicado por ${testimonial.source} em ${formatTestimonialDate(testimonial.publicationDate)}`;
+  page.querySelector('.testimonial-detail__header h1').textContent = testimonial.subject;
+  page.querySelector('.testimonial-detail__message p').textContent = testimonial.quote;
+  page.querySelector('[data-share="whatsapp"]').href =
+    `https://wa.me/?text=${encodeURIComponent(`${testimonial.subject} — ${shareUrl}`)}`;
+  page.querySelector('[data-share="facebook"]').href =
+    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+  renderTestimonialComments(id);
+}
+
+function initTestimonialDetail() {
+  const page = document.querySelector('[data-view="depoimento"]');
+  if (!page) return;
+  const form = page.querySelector('.testimonial-detail__comment-form');
+  const commentStatus = page.querySelector('.testimonial-detail__comment-status');
+  const shareStatus = page.querySelector('.testimonial-detail__share-status');
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!activeTestimonialDetailId || !form.reportValidity()) return;
+    const data = new FormData(form);
+    const comments = getTestimonialComments(activeTestimonialDetailId);
+    comments.push({
+      name: String(data.get('name') || '').trim(),
+      date: new Intl.DateTimeFormat('pt-BR').format(new Date()),
+      message: String(data.get('message') || '').trim()
+    });
+    renderTestimonialComments(activeTestimonialDetailId);
+    form.reset();
+    commentStatus.textContent = 'Comentário adicionado nesta sessão.';
+    page.querySelector('.testimonial-detail__comments h2').scrollIntoView({ block: 'nearest' });
+  });
+
+  form.addEventListener('input', () => {
+    commentStatus.textContent = '';
+  });
+
+  page.querySelector('[data-share="instagram"]').addEventListener('click', async () => {
+    await copyTestimonialLink(shareStatus);
+  });
+
+  page.querySelector('[data-share="copy"]').addEventListener('click', async () => {
+    await copyTestimonialLink(shareStatus);
+  });
+}
+
+async function copyTestimonialLink(status) {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    status.textContent = 'Link copiado.';
+  } catch (error) {
+    status.textContent = 'Não foi possível copiar o link automaticamente.';
+  }
 }
 
 function initAthleteSearch(form) {
@@ -1064,6 +1276,7 @@ function initVideoRegistration() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initTestimonialActions();
+  initTestimonialDetail();
   initJuntosPodemosVideos();
   initVideoRegistration();
 
@@ -1732,6 +1945,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (hash.startsWith('noticia/')) {
       showView('noticia');
+      return;
+    }
+
+    if (hash.startsWith('depoimento/')) {
+      let testimonialId = '';
+      try {
+        testimonialId = decodeURIComponent(hash.slice('depoimento/'.length));
+      } catch (error) {
+        showView('home');
+        window.location.hash = 'depoimentos';
+        return;
+      }
+      showView('depoimento');
+      renderTestimonialDetail(testimonialId);
+      window.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }
 
