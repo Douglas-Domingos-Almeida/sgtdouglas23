@@ -6,7 +6,7 @@
   <meta name="uca-api-base" content="http://127.0.0.1:3000">
   <title>Projeto UCA</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%23c8102e%22/%3E%3Ctext x=%2232%22 y=%2242%22 text-anchor=%22middle%22 font-family=%22Arial,sans-serif%22 font-size=%2224%22 font-weight=%22700%22 fill=%22white%22%3EUCA%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style-modern.css?v=20261118-testimonial-grid-3x2-proportion-r2">
+  <link rel="stylesheet" href="css/style-modern.css?v=20261119-testimonial-comments-scroll">
 </head>
 <body>
   <header class="site-header site-header--home">
@@ -127,7 +127,7 @@
     </dialog>
 
     <script src="js/text-utils.js?v=20261021-dry-refactor"></script>
-    <script src="js/main.js?v=20261118-testimonial-grid-4x2"></script>
+    <script src="js/main.js?v=20261119-testimonial-list-logo-hide"></script>
     <script src="js/news-data.js?v=20261014-file-support" charset="utf-8" defer></script>
     <script src="js/news.js?v=20261024-news-badges" defer></script>
     <script type="module" src="js/admin-auth.js?v=20261115-acesso-glass"></script>
@@ -630,7 +630,7 @@
             </blockquote>
             <div class="testimonial-card__footer">
               <p class="testimonial-card__role"><span class="testimonial-card__author">Atletismo Master</span><span class="testimonial-card__date"></span></p>
-              <a class="testimonial-card__view" href="#depoimentos"><span aria-hidden="true">▶</span>Visualizar o<br>Depoimento</a>
+              <a class="testimonial-card__view" href="#depoimentos"><span aria-hidden="true">▶</span>Visualizar o Depoimento</a>
             </div>
           </article>
         </li>
@@ -648,7 +648,7 @@
             </blockquote>
             <div class="testimonial-card__footer">
               <p class="testimonial-card__role"><span class="testimonial-card__author">Atletismo Master</span><span class="testimonial-card__date"></span></p>
-              <a class="testimonial-card__view" href="#depoimentos"><span aria-hidden="true">▶</span>Visualizar o<br>Depoimento</a>
+              <a class="testimonial-card__view" href="#depoimentos"><span aria-hidden="true">▶</span>Visualizar o Depoimento</a>
             </div>
           </article>
         </li>
@@ -666,7 +666,7 @@
             </blockquote>
             <div class="testimonial-card__footer">
               <p class="testimonial-card__role"><span class="testimonial-card__author">Atletismo Master</span><span class="testimonial-card__date"></span></p>
-              <a class="testimonial-card__view" href="#depoimentos"><span aria-hidden="true">▶</span>Visualizar o<br>Depoimento</a>
+              <a class="testimonial-card__view" href="#depoimentos"><span aria-hidden="true">▶</span>Visualizar o Depoimento</a>
             </div>
           </article>
         </li>
@@ -684,7 +684,7 @@
             </blockquote>
             <div class="testimonial-card__footer">
               <p class="testimonial-card__role"><span class="testimonial-card__author">Atletismo Master</span><span class="testimonial-card__date"></span></p>
-              <a class="testimonial-card__view" href="#depoimentos"><span aria-hidden="true">▶</span>Visualizar o<br>Depoimento</a>
+              <a class="testimonial-card__view" href="#depoimentos"><span aria-hidden="true">▶</span>Visualizar o Depoimento</a>
             </div>
           </article>
         </li>
@@ -1207,6 +1207,7 @@
 
           <div class="testimonial-detail__message-grid">
             <blockquote class="testimonial-detail__message">
+              <span class="testimonial-detail__quote-open" aria-hidden="true">“</span>
               <p></p>
             </blockquote>
           </div>
@@ -1216,7 +1217,7 @@
               <span aria-hidden="true">●</span>
               Comentários <span data-comment-count>(0)</span>
             </h2>
-            <ul class="testimonial-detail__comment-list"></ul>
+            <ul class="testimonial-detail__comment-list" tabindex="0" aria-label="Comentários do depoimento"></ul>
 
             <form class="testimonial-detail__comment-form">
               <h3>Deixe seu comentário</h3>

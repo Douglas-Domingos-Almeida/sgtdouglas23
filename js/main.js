@@ -446,15 +446,24 @@ function renderTestimonialDetail(id) {
   const imageSrc = testimonialImagesById.get(id)
     || new URL('../imagens/Master/Master%20(1).jfif', mainScriptUrl).href;
   const shareUrl = new URL(`#depoimento/${encodeURIComponent(id)}`, window.location.href).href;
+  const publication = page.querySelector('.testimonial-detail__publication');
   status.hidden = true;
   layout.hidden = false;
   page.querySelector('.testimonial-detail__portrait').src = imageSrc;
   page.querySelector('.testimonial-detail__portrait').alt = `Atleta do depoimento ${testimonial.subject}`;
   page.querySelector('.testimonial-detail__athlete-title').textContent = testimonial.subject;
-  page.querySelector('.testimonial-detail__publication').textContent =
-    `Publicado por ${testimonial.source} em ${formatTestimonialDate(testimonial.publicationDate)}`;
+  publication.replaceChildren(
+    document.createTextNode(`Publicado por ${testimonial.source}`),
+    document.createElement('br'),
+    document.createTextNode(`em ${formatTestimonialDate(testimonial.publicationDate)}`)
+  );
   page.querySelector('.testimonial-detail__header h1').textContent = testimonial.subject;
-  page.querySelector('.testimonial-detail__message p').textContent = testimonial.quote;
+  const quote = page.querySelector('.testimonial-detail__message p');
+  const closingQuote = document.createElement('span');
+  closingQuote.className = 'testimonial-detail__quote-close';
+  closingQuote.setAttribute('aria-hidden', 'true');
+  closingQuote.textContent = '”';
+  quote.replaceChildren(document.createTextNode(testimonial.quote), closingQuote);
   page.querySelector('[data-share="whatsapp"]').href =
     `https://wa.me/?text=${encodeURIComponent(`${testimonial.subject} — ${shareUrl}`)}`;
   page.querySelector('[data-share="facebook"]').href =
@@ -480,9 +489,10 @@ function initTestimonialDetail() {
       message: String(data.get('message') || '').trim()
     });
     renderTestimonialComments(activeTestimonialDetailId);
+    page.querySelector('.testimonial-detail__comment-list').scrollTop =
+      page.querySelector('.testimonial-detail__comment-list').scrollHeight;
     form.reset();
     commentStatus.textContent = 'Comentário adicionado nesta sessão.';
-    page.querySelector('.testimonial-detail__comments h2').scrollIntoView({ block: 'nearest' });
   });
 
   form.addEventListener('input', () => {
@@ -1906,6 +1916,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    document.body.classList.toggle('testimonial-detail-active', activeView.dataset.view === 'depoimento');
+    document.body.classList.toggle(
+      'testimonial-list-active',
+      activeView.dataset.view === 'home'
+        && window.location.hash.replace('#', '').trim() === 'depoimentos'
+    );
     views.forEach((view) => {
       const isCurrent = view === activeView;
       view.classList.toggle('page__view--hidden', !isCurrent);
